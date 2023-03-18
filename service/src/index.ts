@@ -18,7 +18,7 @@ app.all('*', (_, res, next) => {
 })
 
 router.post('/chat-process', auth, async (req, res) => {
-  res.setHeader('Content-type', 'application/octet-stream')
+  res.setHeader('Content-type', 'text/event-stream; charset=utf-8')
 
   try {
     const { prompt, options = {} } = req.body as { prompt: string; options?: ChatContext }

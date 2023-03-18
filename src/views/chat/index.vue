@@ -351,16 +351,7 @@ function handleExport() {
 function handleDelete(index: number) {
   if (loading.value)
     return
-
-  dialog.warning({
-    title: t('chat.deleteMessage'),
-    content: t('chat.deleteMessageConfirm'),
-    positiveText: t('common.yes'),
-    negativeText: t('common.no'),
-    onPositiveClick: () => {
-      chatStore.deleteChatByUuid(+uuid, index)
-    },
-  })
+  chatStore.deleteChatByUuid(+uuid, index)
 }
 
 function handleClear() {

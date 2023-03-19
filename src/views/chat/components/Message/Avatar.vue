@@ -20,5 +20,5 @@ const avatar = computed(() => userStore.userInfo.avatar)
     <NAvatar v-if="isString(avatar) && avatar.length > 0" :src="avatar" :fallback-src="defaultAvatar" />
     <NAvatar v-else round :src="defaultAvatar" />
   </template>
-  <NAvatar v-else round src="/yumemi.png" />
+  <NAvatar v-else round src="/avatar.png" />
 </template>

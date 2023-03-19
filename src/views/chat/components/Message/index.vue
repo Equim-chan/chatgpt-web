@@ -49,7 +49,6 @@ const options = computed(() => [
     label: t('chat.edit'),
     key: 'editText',
     icon: iconRender({ icon: 'material-symbols:edit-outline' }),
-    disabled: !props.inversion,
   },
   {
     label: t('chat.copy'),

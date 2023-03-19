@@ -197,7 +197,7 @@ async function onConversation() {
   }
 }
 
-async function onEdit(text: string, index: number) {
+async function onEdit(text: string, index: number, inversion?: boolean) {
   dataSources.value.splice(index + 1)
   // eslint-disable-next-line no-console
   console.log('onEdit', text, index, dataSources.value[index])
@@ -207,6 +207,9 @@ async function onEdit(text: string, index: number) {
     return
 
   if (!message || message.trim() === '')
+    return
+
+  if (!inversion)
     return
 
   controller = new AbortController()
@@ -625,7 +628,7 @@ onUnmounted(() => {
                 :inversion="item.inversion"
                 :error="item.error"
                 :loading="item.loading"
-                @edit-submit="onEdit($event, index)"
+                @edit-submit="onEdit($event, index, item.inversion)"
                 @regenerate="onRegenerate(index)"
                 @delete="handleDelete(index)"
               />

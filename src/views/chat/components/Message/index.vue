@@ -46,11 +46,6 @@ const asRawText = ref(false)
 
 const options = computed(() => [
   {
-    label: asRawText.value ? t('chat.preview') : t('chat.showRawText'),
-    key: 'toggleRenderType',
-    icon: iconRender({ icon: asRawText.value ? 'ic:outline-code-off' : 'ic:outline-code' }),
-  },
-  {
     label: t('chat.edit'),
     key: 'editText',
     icon: iconRender({ icon: 'material-symbols:edit-outline' }),
@@ -60,6 +55,11 @@ const options = computed(() => [
     label: t('chat.copy'),
     key: 'copyText',
     icon: iconRender({ icon: 'ri:file-copy-2-line' }),
+  },
+  {
+    label: asRawText.value ? t('chat.preview') : t('chat.showRawText'),
+    key: 'toggleRenderType',
+    icon: iconRender({ icon: asRawText.value ? 'ic:outline-code-off' : 'ic:outline-code' }),
   },
   {
     label: t('common.delete'),

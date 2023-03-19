@@ -59,7 +59,7 @@ const wrapClass = computed(() => {
 
 const text = computed(() => {
   const value = props.text ?? ''
-  if (!props.asRawText)
+  if (!props.asRawText && !props.edit)
     return mdi.render(value)
   return value
 })
@@ -109,7 +109,7 @@ defineExpose({ textRef })
           </div>
         </template>
         <template v-else>
-          <div v-if="!asRawText" class="markdown-body" v-html="text" />
+          <div v-if="!asRawText && !edit" class="markdown-body" v-html="text" />
           <div v-else class="whitespace-pre-wrap" v-text="text" />
         </template>
       </div>

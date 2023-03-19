@@ -58,9 +58,7 @@ const wrapClass = computed(() => {
 
 const text = computed(() => {
   const value = props.text ?? ''
-  if (!props.inversion)
-    return mdi.render(value)
-  return value
+  return mdi.render(value)
 })
 
 function handleSubmit() {
@@ -108,8 +106,7 @@ defineExpose({ textRef })
           </div>
         </template>
         <template v-else>
-          <div v-if="!inversion" class="markdown-body" v-html="text" />
-          <div v-else class="whitespace-pre-wrap" v-text="text" />
+          <div class="markdown-body" v-html="text" />
         </template>
       </div>
     </template>

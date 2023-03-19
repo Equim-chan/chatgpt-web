@@ -13,6 +13,7 @@ interface Props {
   error?: boolean
   text?: string
   loading?: boolean
+  asRawText?: boolean
   edit?: boolean
 }
 
@@ -58,7 +59,7 @@ const wrapClass = computed(() => {
 
 const text = computed(() => {
   const value = props.text ?? ''
-  if (!props.inversion)
+  if (!props.asRawText)
     return mdi.render(value)
   return value
 })
@@ -108,7 +109,7 @@ defineExpose({ textRef })
           </div>
         </template>
         <template v-else>
-          <div v-if="!inversion" class="markdown-body" v-html="text" />
+          <div v-if="!asRawText" class="markdown-body" v-html="text" />
           <div v-else class="whitespace-pre-wrap" v-text="text" />
         </template>
       </div>

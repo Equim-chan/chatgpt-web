@@ -42,7 +42,14 @@ const childValue = computed<string>({
   },
 })
 
-const options = [
+const asRawText = ref(false)
+
+const options = computed(() => [
+  {
+    label: asRawText.value ? t('chat.preview') : t('chat.showRawText'),
+    key: 'toggleRenderType',
+    icon: iconRender({ icon: asRawText.value ? 'ic:outline-code-off' : 'ic:outline-code' }),
+  },
   {
     label: t('chat.edit'),
     key: 'editText',
@@ -59,15 +66,18 @@ const options = [
     key: 'delete',
     icon: iconRender({ icon: 'ri:delete-bin-line' }),
   },
-]
+])
 
-function handleSelect(key: 'editText' | 'copyRaw' | 'copyText' | 'delete') {
+function handleSelect(key: 'editText' | 'copyRaw' | 'copyText' | 'toggleRenderType' | 'delete') {
   switch (key) {
     case 'editText':
       edit.value = true
       break
     case 'copyText':
       copyText({ text: props.text ?? '' })
+      return
+    case 'toggleRenderType':
+      asRawText.value = !asRawText.value
       return
     case 'delete':
       emit('delete')
@@ -110,6 +120,7 @@ function handleEditCancel() {
           :inversion="inversion"
           :error="error"
           :loading="loading"
+          :as-raw-text="asRawText"
           :edit="edit"
           @edit-cancel="handleEditCancel"
           @edit-submit="handleEditSubmit"

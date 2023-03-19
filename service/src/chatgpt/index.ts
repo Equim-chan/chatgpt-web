@@ -46,7 +46,7 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
     if (isNotEmptyString(process.env.SYSTEM_MESSAGE)) {
       let now = new Date()
       now = new Date(now.getTime() - (now.getTimezoneOffset()*60*1000))
-      options.systemMessage = process.env.SYSTEM_MESSAGE + `\nCurrent date: ${now.toISOString().substr(0, 10)}`
+      options.systemMessage = process.env.SYSTEM_MESSAGE + `\nCurrent date: ${now.toISOString().substring(0, 10)}`
     }
     if (isNotEmptyString(process.env.PARAMS_TEMPERATURE)) {
       options.completionParams.temperature = parseFloat(process.env.PARAMS_TEMPERATURE)

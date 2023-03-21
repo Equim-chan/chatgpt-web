@@ -40,6 +40,7 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
     const options: ChatGPTAPIOptions = {
       apiKey: process.env.OPENAI_API_KEY,
       completionParams: { model },
+      maxModelTokens: 32768,
       debug: true,
     }
 
@@ -117,7 +118,7 @@ async function fetchBalance() {
   const OPENAI_API_BASE_URL = process.env.OPENAI_API_BASE_URL
 
   if (!isNotEmptyString(OPENAI_API_KEY))
-    return Promise.resolve('-')
+    return '-'
 
   const API_BASE_URL = isNotEmptyString(OPENAI_API_BASE_URL)
     ? OPENAI_API_BASE_URL
@@ -127,15 +128,46 @@ async function fetchBalance() {
     const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_API_KEY}` }
     const response = await axios.get(`${API_BASE_URL}/dashboard/billing/credit_grants`, { headers })
     const balance = response.data.total_available ?? 0
-    return Promise.resolve(balance.toFixed(3))
+    return balance.toFixed(3)
   }
   catch {
-    return Promise.resolve('-')
+    return '-'
+  }
+}
+
+async function fetchMonthlyUsage() {
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY
+  const OPENAI_API_BASE_URL = process.env.OPENAI_API_BASE_URL
+
+  if (!isNotEmptyString(OPENAI_API_KEY))
+    return '-'
+
+  const API_BASE_URL = isNotEmptyString(OPENAI_API_BASE_URL)
+    ? OPENAI_API_BASE_URL
+    : 'https://api.openai.com/v1'
+
+  const now = new Date()
+  const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+  const startOfNextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1))
+
+  try {
+    const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_API_KEY}` }
+    const params = {
+      'start_date': startOfMonth.toISOString().substring(0, 10),
+      'end_date': startOfNextMonth.toISOString().substring(0, 10),
+    }
+    const response = await axios.get(`${API_BASE_URL}/dashboard/billing/usage`, { headers, params })
+    const monthlyUsage = (response.data.total_usage ?? 0) / 100
+    return monthlyUsage.toFixed(3)
+  }
+  catch {
+    return '-'
   }
 }
 
 async function chatConfig() {
-  const balance = await fetchBalance()
+  // const balance = await fetchBalance()
+  const monthlyUsage = await fetchMonthlyUsage()
   const reverseProxy = process.env.API_REVERSE_PROXY ?? '-'
   const httpsProxy = (process.env.HTTPS_PROXY || process.env.ALL_PROXY) ?? '-'
   const socksProxy = (process.env.SOCKS_PROXY_HOST && process.env.SOCKS_PROXY_PORT)
@@ -143,7 +175,7 @@ async function chatConfig() {
     : '-'
   return sendResponse<ModelConfig>({
     type: 'Success',
-    data: { apiModel, reverseProxy, timeoutMs, socksProxy, httpsProxy, balance },
+    data: { apiModel, reverseProxy, timeoutMs, socksProxy, httpsProxy, monthlyUsage },
   })
 }
 

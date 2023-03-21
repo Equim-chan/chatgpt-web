@@ -69,6 +69,7 @@ export default {
     socks: 'Socks',
     httpsProxy: 'HTTPS Proxy',
     balance: 'API Balance',
+    monthlyUsage: 'Monthly usage',
   },
   store: {
     local: 'Local',

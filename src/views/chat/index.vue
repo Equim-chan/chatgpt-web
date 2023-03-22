@@ -282,13 +282,14 @@ async function onEdit(text: string, index: number, inversion?: boolean) {
               return fetchChatAPIOnce()
             }
 
-            scrollToBottom()
+            scrollToBottomIfAtBottom()
           }
           catch (error) {
           //
           }
         },
       })
+			scrollToBottomIfAtBottom()
     }
 
     await fetchChatAPIOnce()
@@ -304,7 +305,7 @@ async function onEdit(text: string, index: number, inversion?: boolean) {
           loading: false,
         },
       )
-      scrollToBottom()
+      scrollToBottomIfAtBottom()
       return
     }
 
@@ -336,7 +337,146 @@ async function onEdit(text: string, index: number, inversion?: boolean) {
         requestOptions: { prompt: message, options: { ...options } },
       },
     )
-    scrollToBottom()
+    scrollToBottomIfAtBottom()
+  }
+  finally {
+    loading.value = false
+  }
+}
+
+async function onEdit(text: string, index: number, inversion?: boolean) {
+  dataSources.value.splice(index + 1)
+  // eslint-disable-next-line no-console
+  console.log('onEdit', text, index, dataSources.value[index])
+  let message = text
+
+  if (loading.value)
+    return
+
+  if (!message || message.trim() === '')
+    return
+
+  if (!inversion)
+    return
+
+  controller = new AbortController()
+
+  loading.value = true
+  prompt.value = ''
+
+  let options: Chat.ConversationRequest = {}
+  const lastContext = conversationList.value[conversationList.value.length - 1]?.conversationOptions
+
+  if (lastContext && usingContext.value)
+    options = { ...lastContext }
+
+  addChat(
+    +uuid,
+    {
+      dateTime: new Date().toLocaleString(),
+      text: '',
+      loading: true,
+      inversion: false,
+      error: false,
+      conversationOptions: null,
+      requestOptions: { prompt: message, options: { ...options } },
+    },
+  )
+  scrollToBottom()
+
+  try {
+    let lastText = ''
+    const fetchChatAPIOnce = async () => {
+      await fetchChatAPIProcess<Chat.ConversationResponse>({
+        prompt: message,
+        options,
+        signal: controller.signal,
+        onDownloadProgress: ({ event }) => {
+          const xhr = event.target
+          const { responseText } = xhr
+          // Always process the final line
+          const lastIndex = responseText.lastIndexOf('\n')
+          let chunk = responseText
+          if (lastIndex !== -1)
+            chunk = responseText.substring(lastIndex)
+          try {
+            const data = JSON.parse(chunk)
+            updateChat(
+              +uuid,
+              dataSources.value.length - 1,
+              {
+                dateTime: new Date().toLocaleString(),
+                text: lastText + data.text ?? '',
+                inversion: false,
+                error: false,
+                loading: false,
+                conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
+                requestOptions: { prompt: message, options: { ...options } },
+              },
+            )
+
+            if (openLongReply && data.detail.choices[0].finish_reason === 'length') {
+              options.parentMessageId = data.id
+              lastText = data.text
+              message = ''
+              return fetchChatAPIOnce()
+            }
+
+            scrollToBottomIfAtBottom()
+          }
+          catch (error) {
+          //
+          }
+        },
+      })
+    }
+
+    await fetchChatAPIOnce()
+  }
+  catch (error: any) {
+    const errorMessage = error?.message ?? t('common.wrong')
+
+    if (error.message === 'canceled') {
+      updateChatSome(
+        +uuid,
+        dataSources.value.length - 1,
+        {
+          loading: false,
+        },
+      )
+      scrollToBottomIfAtBottom()
+      return
+    }
+
+    const currentChat = getChatByUuidAndIndex(+uuid, dataSources.value.length - 1)
+
+    if (currentChat?.text && currentChat.text !== '') {
+      updateChatSome(
+        +uuid,
+        dataSources.value.length - 1,
+        {
+          text: `${currentChat.text}\n[${errorMessage}]`,
+          error: false,
+          loading: false,
+        },
+      )
+      return
+    }
+
+    updateChat(
+      +uuid,
+      dataSources.value.length - 1,
+      {
+        dateTime: new Date().toLocaleString(),
+        text: errorMessage,
+        inversion: false,
+        error: true,
+        loading: false,
+        conversationOptions: null,
+        requestOptions: { prompt: message, options: { ...options } },
+      },
+    )
+    scrollToBottomIfAtBottom()
   }
   finally {
     loading.value = false

@@ -42,8 +42,20 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
     const options: ChatGPTAPIOptions = {
       apiKey: process.env.OPENAI_API_KEY,
       completionParams: { model },
-      maxModelTokens: 32768,
       debug: true,
+    }
+
+    // increase max token limit if use gpt-4
+    if (model.toLowerCase().includes('gpt-4')) {
+      // if use 32k model
+      if (model.toLowerCase().includes('32k')) {
+        options.maxModelTokens = 32768
+        options.maxResponseTokens = 8192
+      }
+      else {
+        options.maxModelTokens = 8192
+        options.maxResponseTokens = 2048
+      }
     }
 
     if (isNotEmptyString(process.env.SYSTEM_MESSAGE)) {

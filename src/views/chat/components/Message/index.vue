@@ -6,6 +6,7 @@ import TextComponent from './Text.vue'
 import { SvgIcon } from '@/components/common'
 import { copyText } from '@/utils/format'
 import { useIconRender } from '@/hooks/useIconRender'
+import { useUserStore } from '@/store'
 import { t } from '@/locales'
 
 interface Props {
@@ -22,6 +23,10 @@ interface Emit {
   (ev: 'regenerate'): void
   (ev: 'delete'): void
 }
+
+const userStore = useUserStore()
+
+const userInfo = computed(() => userStore.userInfo)
 
 const props = defineProps<Props>()
 
@@ -48,11 +53,6 @@ const messageRef = ref<HTMLElement>()
 
 const options = computed(() => [
   {
-    label: t('chat.edit'),
-    key: 'editText',
-    icon: iconRender({ icon: 'material-symbols:edit-outline' }),
-  },
-  {
     label: t('chat.copy'),
     key: 'copyText',
     icon: iconRender({ icon: 'ri:file-copy-2-line' }),
@@ -69,11 +69,8 @@ const options = computed(() => [
   },
 ])
 
-function handleSelect(key: 'editText' | 'copyRaw' | 'copyText' | 'toggleRenderType' | 'delete') {
+function handleSelect(key: 'copyText' | 'toggleRenderType' | 'delete') {
   switch (key) {
-    case 'editText':
-      edit.value = true
-      break
     case 'copyText':
       copyText({ text: props.text ?? '' })
       return
@@ -88,6 +85,10 @@ function handleSelect(key: 'editText' | 'copyRaw' | 'copyText' | 'toggleRenderTy
 function handleRegenerate() {
   messageRef.value?.scrollIntoView()
   emit('regenerate')
+}
+
+function handleEdit() {
+  edit.value = true
 }
 
 function handleEditSubmit(text: string) {
@@ -114,7 +115,9 @@ function handleEditCancel() {
     </div>
     <div class="overflow-hidden text-sm " :class="[inversion ? 'items-end' : 'items-start']">
       <p class="text-xs text-[#b4bbc4]" :class="[inversion ? 'text-right' : 'text-left']">
-        {{ dateTime }}
+        <span v-if="!inversion">{{ userInfo.aiName }}&nbsp;</span>
+        <span class="text-[#b4bbc4]/50">{{ dateTime }}</span>
+        <span v-if="inversion">&nbsp;{{ userInfo.name }}</span>
       </p>
       <div
         class="flex items-end gap-1 mt-2"
@@ -133,7 +136,14 @@ function handleEditCancel() {
         />
         <div class="flex flex-col">
           <button
-            v-if="!inversion"
+            v-if="inversion"
+            class="mb-2 transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-300"
+            @click="handleEdit"
+          >
+            <SvgIcon icon="ri:edit-box-line" />
+          </button>
+          <button
+            v-else
             class="mb-2 transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-300"
             @click="handleRegenerate"
           >

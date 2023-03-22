@@ -59,6 +59,7 @@ export default {
     config: 'Config',
     avatarLink: 'Avatar Link',
     name: 'Name',
+    aiName: 'AI Name',
     description: 'Description',
     role: 'Role',
     resetUserInfo: 'Reset UserInfo',

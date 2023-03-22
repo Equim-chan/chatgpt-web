@@ -59,6 +59,7 @@ export default {
     config: '配置',
     avatarLink: '头像链接',
     name: '名称',
+    aiName: 'AI 名称',
     description: '描述',
     role: '角色设定',
     resetUserInfo: '重置用户信息',

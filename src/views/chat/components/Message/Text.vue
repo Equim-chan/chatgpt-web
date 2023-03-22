@@ -76,6 +76,20 @@ function handleInput(v: string) {
   emit('update:text', v)
 }
 
+function handleEnter(event: KeyboardEvent) {
+  if (!isMobile.value) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      handleSubmit()
+    }
+  } else {
+    if (event.key === 'Enter' && event.ctrlKey) {
+      event.preventDefault()
+      handleSubmit()
+    }
+  }
+}
+
 function highlightBlock(str: string, lang?: string) {
   return `<pre class="code-block-wrapper"><div class="code-block-header"><span class="code-block-header__lang">${lang}</span><span class="code-block-header__copy">${t('chat.copyCode')}</span></div><code class="hljs code-block-body ${lang}">${str}</code></pre>`
 }
@@ -97,6 +111,7 @@ defineExpose({ textRef })
               type="textarea"
               :autosize="{ minRows: 5 }"
               @input="handleInput"
+              @keypress="handleEnter"
             />
             <div class="chat-edit-buttons">
               <NButton type="primary" @click="handleSubmit">

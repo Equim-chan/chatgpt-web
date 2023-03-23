@@ -10,7 +10,7 @@ import {
   useMessage,
   useNotification,
 } from 'naive-ui'
-import { post } from '@/utils/request'
+import { get, post } from '@/utils/request'
 
 function registerNaiveTools() {
   window.$loadingBar = useLoadingBar()
@@ -19,11 +19,41 @@ function registerNaiveTools() {
   window.$notification = useNotification()
 }
 
-function backgroundSync() {
-  const interval = 10000
-  window.$message?.info(`Auto upload enabled, interval ${interval} ms`)
+async function backgroundSync() {
+  let oldStateJSON = '{}'
 
-  let oldStateJSON = ''
+  try {
+    const { data: body } = await get({ url: '/v1/chat-storage' })
+    const remoteJSON = JSON.stringify(body)
+    oldStateJSON = localStorage.getItem('chatStorage') || '{}'
+
+    if (remoteJSON !== oldStateJSON) {
+      const overrideLocal = await new Promise(resolve => {
+        window.$dialog?.warning({
+          title: 'Inconsistent Data',
+          content: 'There are differences between your local and remote storage. Do you want to overwrite local data?',
+          positiveText: 'Yes',
+          negativeText: 'No',
+          onPositiveClick: () => resolve(true),
+          onNegativeClick: () => resolve(false),
+        })
+      })
+      if (!overrideLocal) {
+        window.$message?.warning('Auto upload is disabled')
+        return
+      }
+      localStorage.setItem('chatStorage', remoteJSON)
+      window.location.reload()
+    }
+  } catch (err) {
+    window.$message?.error('Download failed')
+    console.error(err)
+    return
+  }
+
+  const interval = 10000
+  window.$message?.info(`Auto upload is enabled, interval ${interval} ms`)
+
   setInterval(async () => {
     try {
       const newStateJSON = localStorage.getItem('chatStorage') || '{}'

@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { defineAsyncComponent, ref } from 'vue'
+import { defineAsyncComponent, ref, nextTick } from 'vue'
 import { useMessage, useDialog } from 'naive-ui'
 import { get, post } from '@/utils/request'
 import { HoverButton, SvgIcon, UserAvatar } from '@/components/common'
@@ -16,16 +16,18 @@ function downloadChat() {
     content: 'Download from server and override local data?',
     positiveText: 'Yes',
     negativeText: 'No',
-    onPositiveClick: async () => {
-      try {
-        const { data: body } = await get({url: '/v1/chat-storage'})
-        localStorage.setItem('chatStorage', JSON.stringify(body))
-        ms.success('Upload success')
-        location.reload()
-      } catch (error) {
-        ms.error('Upload failed')
-        console.error(error)
-      }
+    onPositiveClick: () => {
+      nextTick(async () => {
+        try {
+          const { data: body } = await get({ url: '/v1/chat-storage' })
+          localStorage.setItem('chatStorage', JSON.stringify(body))
+          ms.success('Download success')
+          location.reload()
+        } catch (error) {
+          ms.error('Download failed')
+          console.error(error)
+        }
+      })
     },
   })
 }
@@ -36,15 +38,17 @@ function uploadChat() {
     content: 'Upload to server and override remote data?',
     positiveText: 'Yes',
     negativeText: 'No',
-    onPositiveClick: async () => {
-      try {
-        const chatStorage = JSON.parse(localStorage.getItem('chatStorage') || '{}')
-        await post({url: '/v1/chat-storage', data: chatStorage})
-        ms.success('Download success')
-      } catch (error) {
-        ms.error('Download failed')
-        console.error(error)
-      }
+    onPositiveClick: () => {
+      nextTick(async () => {
+        try {
+          const chatStorage = JSON.parse(localStorage.getItem('chatStorage') || '{}')
+          await post({url: '/v1/chat-storage', data: chatStorage})
+          ms.success('Upload success')
+        } catch (error) {
+          ms.error('Upload failed')
+          console.error(error)
+        }
+      })
     },
   })
 }

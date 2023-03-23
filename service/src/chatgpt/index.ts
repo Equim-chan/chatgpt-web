@@ -7,7 +7,6 @@ import httpsProxyAgent from 'https-proxy-agent'
 import fetch from 'node-fetch'
 import axios from 'axios'
 import Keyv from 'keyv'
-import KeyvRedis from '@keyv/redis'
 import { sendResponse } from '../utils'
 import { isNotEmptyString } from '../utils/is'
 import type { ApiModel, ChatContext, ChatGPTUnofficialProxyAPIOptions, ModelConfig } from '../types'
@@ -62,9 +61,9 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
       }
     }
 
-    if (isNotEmptyString(process.env.REDIS_URL)) {
-      const store = new KeyvRedis(process.env.REDIS_URL)
-      options.messageStore = new Keyv({ store, namespace: 'chatgpt-web' })
+    if (isNotEmptyString(process.env.POSTGRES_URL) && isNotEmptyString(process.env.POSTGRES_TABLE)) {
+      const keyvOpts = { table: process.env.POSTGRES_TABLE }
+      options.messageStore = new Keyv(process.env.POSTGRES_URL, keyvOpts)
     }
     if (isNotEmptyString(process.env.SYSTEM_MESSAGE)) {
       let now = new Date()

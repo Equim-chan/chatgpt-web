@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { computed, ref } from 'vue'
+import { computed, ref, nextTick } from 'vue'
 import { NDropdown } from 'naive-ui'
 import AvatarComponent from './Avatar.vue'
 import TextComponent from './Text.vue'
@@ -37,7 +37,7 @@ const { isMobile } = useBasicLayout()
 
 const { iconRender } = useIconRender()
 
-const textRef = ref<HTMLElement>()
+const textRef = ref<InstanceType<typeof TextComponent>>()
 
 const edit = ref<boolean>(false)
 
@@ -92,6 +92,7 @@ function handleRegenerate() {
 
 function handleEdit() {
   edit.value = true
+  nextTick(() => textRef.value?.inputRef?.focus())
 }
 
 function handleEditSubmit(text: string) {
@@ -102,6 +103,9 @@ function handleEditSubmit(text: string) {
 function handleEditCancel() {
   edit.value = false
 }
+
+// for ArrowUp trigger
+defineExpose({ handleEdit })
 </script>
 
 <template>
@@ -139,14 +143,14 @@ function handleEditCancel() {
         />
         <div class="flex flex-col">
           <button
-            v-if="inversion"
+            v-if="inversion && !edit"
             class="mb-2 transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-300"
             @click="handleEdit"
           >
             <SvgIcon icon="ri:edit-box-line" />
           </button>
           <button
-            v-else
+            v-if="!inversion"
             class="mb-2 transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-300"
             @click="handleRegenerate"
           >

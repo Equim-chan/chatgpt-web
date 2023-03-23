@@ -30,6 +30,8 @@ const { isMobile } = useBasicLayout()
 
 const textRef = ref<HTMLElement>()
 
+const inputRef = ref<HTMLElement>()
+
 const mdi = new MarkdownIt({
   linkify: true,
   highlight(code, language) {
@@ -76,7 +78,13 @@ function handleInput(v: string) {
   emit('update:text', v)
 }
 
-function handleEnter(event: KeyboardEvent) {
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    handleCancel()
+    return
+  }
+
   if (!isMobile.value) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
@@ -94,7 +102,7 @@ function highlightBlock(str: string, lang?: string) {
   return `<pre class="code-block-wrapper"><div class="code-block-header"><span class="code-block-header__lang">${lang}</span><span class="code-block-header__copy">${t('chat.copyCode')}</span></div><code class="hljs code-block-body ${lang}">${str}</code></pre>`
 }
 
-defineExpose({ textRef })
+defineExpose({ textRef, inputRef })
 </script>
 
 <template>
@@ -107,11 +115,12 @@ defineExpose({ textRef })
         <template v-if="edit">
           <div class="whitespace-pre-wrap">
             <NInput
+              ref="inputRef"
               :value="text"
               type="textarea"
               :autosize="{ minRows: 5 }"
               @input="handleInput"
-              @keypress="handleEnter"
+              @keydown="handleKeydown"
             />
             <div class="chat-edit-buttons">
               <NButton type="primary" @click="handleSubmit">

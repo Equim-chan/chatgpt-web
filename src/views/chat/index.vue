@@ -42,6 +42,7 @@ const conversationList = computed(() => dataSources.value.filter(item => (!item.
 const prompt = ref<string>('')
 const loading = ref<boolean>(false)
 const inputRef = ref<Ref | null>(null)
+const messagesRef = ref<InstanceType<typeof Message>[] | null>(null)
 
 // 添加PromptStore
 const promptStore = usePromptStore()
@@ -523,14 +524,23 @@ function handleClear() {
   })
 }
 
-function handleEnter(event: KeyboardEvent) {
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === 'ArrowUp' && prompt.value.length === 0 && messagesRef.value != null) {
+    for (let i = dataSources.value.length - 1; i >= 0; i--) {
+      if (dataSources.value[i].inversion) {
+        messagesRef.value[i].handleEdit()
+        return
+      }
+    }
+    return
+  }
+
   if (!isMobile.value) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
       handleSubmit()
     }
-  }
-  else {
+  } else {
     if (event.key === 'Enter' && event.ctrlKey) {
       event.preventDefault()
       handleSubmit()
@@ -629,6 +639,7 @@ onUnmounted(() => {
             <div>
               <Message
                 v-for="(item, index) of dataSources"
+                ref="messagesRef"
                 :key="index"
                 v-model:text="item.text"
                 :date-time="item.dateTime"
@@ -681,7 +692,7 @@ onUnmounted(() => {
                 @input="handleInput"
                 @focus="handleFocus"
                 @blur="handleBlur"
-                @keypress="handleEnter"
+                @keydown="handleKeydown"
               />
             </template>
           </NAutoComplete>

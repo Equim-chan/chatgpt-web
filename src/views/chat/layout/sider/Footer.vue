@@ -1,10 +1,55 @@
 <script setup lang='ts'>
 import { defineAsyncComponent, ref } from 'vue'
+import { useMessage, useDialog } from 'naive-ui'
+import { get, post } from '@/utils/request'
 import { HoverButton, SvgIcon, UserAvatar } from '@/components/common'
+// import { t } from '@/locales' // ReferenceError: can't access lexical declaration 'store' before initialization
 
 const Setting = defineAsyncComponent(() => import('@/components/common/Setting/index.vue'))
 
-const show = ref(false)
+const ms = useMessage()
+const dialog = useDialog()
+
+function downloadChat() {
+  dialog.warning({
+    title: 'Download',
+    content: 'Download from server and override local data?',
+    positiveText: 'Yes',
+    negativeText: 'No',
+    onPositiveClick: async () => {
+      try {
+        const { data: body } = await get({url: '/v1/chat-storage'})
+        localStorage.setItem('chatStorage', JSON.stringify(body))
+        ms.success('Success')
+        location.reload()
+      } catch (error) {
+        ms.error('Error')
+        console.error(error)
+      }
+    },
+  })
+}
+
+function uploadChat() {
+  dialog.warning({
+    title: 'Upload',
+    content: 'Upload to server and override remote data?',
+    positiveText: 'Yes',
+    negativeText: 'No',
+    onPositiveClick: async () => {
+      try {
+        const chatStorage = JSON.parse(localStorage.getItem('chatStorage') || '{}')
+        await post({url: '/v1/chat-storage', data: chatStorage})
+        ms.success('Success')
+      } catch (error) {
+        ms.error('Error')
+        console.error(error)
+      }
+    },
+  })
+}
+
+const showSetting = ref(false)
 </script>
 
 <template>
@@ -13,12 +58,22 @@ const show = ref(false)
       <UserAvatar />
     </div>
 
-    <HoverButton @click="show = true">
+    <HoverButton @click="uploadChat">
+      <span class="text-xl text-[#4f555e] dark:text-white">
+        <SvgIcon icon="ri:upload-cloud-2-fill" />
+      </span>
+    </HoverButton>
+    <HoverButton @click="downloadChat">
+      <span class="text-xl text-[#4f555e] dark:text-white">
+        <SvgIcon icon="ri:download-cloud-2-fill" />
+      </span>
+    </HoverButton>
+    <HoverButton @click="showSetting = true">
       <span class="text-xl text-[#4f555e] dark:text-white">
         <SvgIcon icon="ri:settings-4-line" />
       </span>
     </HoverButton>
 
-    <Setting v-if="show" v-model:visible="show" />
+    <Setting v-if="showSetting" v-model:visible="showSetting" />
   </footer>
 </template>

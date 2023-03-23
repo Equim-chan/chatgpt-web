@@ -5,12 +5,13 @@ import { chatConfig, chatReplyProcess, currentModel } from './chatgpt'
 import { auth } from './middleware/auth'
 import { limiter } from './middleware/limiter'
 import { isNotEmptyString } from './utils/is'
+import storage from './store'
 
 const app = express()
 const router = express.Router()
 
 app.use(express.static('public'))
-app.use(express.json())
+app.use(express.json({limit: '50mb'}))
 
 app.all('*', (_, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
@@ -36,7 +37,42 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
     })
   }
   catch (error) {
-    res.write(JSON.stringify(error))
+    res.json(error)
+  }
+  finally {
+    res.end()
+  }
+})
+
+router.get('/v1/chat-storage', [auth, limiter], async (req, res) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8')
+
+  try {
+    const chat = await storage.get('v1-chat-storage') || {}
+    res.json({ data: chat, status: 'Success' })
+  }
+  catch (error) {
+    res.json(error)
+  }
+  finally {
+    res.end()
+  }
+})
+
+router.post('/v1/chat-storage', [auth, limiter], async (req, res) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8')
+
+  try {
+    if (storage == null) {
+      res.write('{}')
+      return
+    }
+    await storage.set('v1-chat-storage', req.body as Object)
+
+    res.json({ status: 'Success' })
+  }
+  catch (error) {
+    res.json(error)
   }
   finally {
     res.end()

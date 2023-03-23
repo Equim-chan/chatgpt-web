@@ -6,11 +6,11 @@ import { SocksProxyAgent } from 'socks-proxy-agent'
 import httpsProxyAgent from 'https-proxy-agent'
 import fetch from 'node-fetch'
 import axios from 'axios'
-import Keyv from 'keyv'
 import { sendResponse } from '../utils'
 import { isNotEmptyString } from '../utils/is'
 import type { ApiModel, ChatContext, ChatGPTUnofficialProxyAPIOptions, ModelConfig } from '../types'
 import type { RequestOptions } from './types'
+import storage from '../store'
 
 const { HttpsProxyAgent } = httpsProxyAgent
 
@@ -46,6 +46,7 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
       apiKey: process.env.OPENAI_API_KEY,
       completionParams: { model },
       debug: true,
+      messageStore: storage,
     }
 
     // increase max token limit if use gpt-4
@@ -61,10 +62,6 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
       }
     }
 
-    if (isNotEmptyString(process.env.POSTGRES_URL) && isNotEmptyString(process.env.POSTGRES_TABLE)) {
-      const keyvOpts = { table: process.env.POSTGRES_TABLE }
-      options.messageStore = new Keyv(process.env.POSTGRES_URL, keyvOpts)
-    }
     if (isNotEmptyString(process.env.SYSTEM_MESSAGE)) {
       let now = new Date()
       now = new Date(now.getTime() - (now.getTimezoneOffset()*60*1000))
@@ -78,7 +75,7 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
     }
 
     if (isNotEmptyString(OPENAI_API_BASE_URL))
-      options.apiBaseUrl = `${OPENAI_API_BASE_URL}/v1`
+      options.apiBaseUrl = OPENAI_API_BASE_URL
 
     setupProxy(options)
 

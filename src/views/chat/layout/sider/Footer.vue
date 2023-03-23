@@ -20,10 +20,10 @@ function downloadChat() {
       try {
         const { data: body } = await get({url: '/v1/chat-storage'})
         localStorage.setItem('chatStorage', JSON.stringify(body))
-        ms.success('Success')
+        ms.success('Upload success')
         location.reload()
       } catch (error) {
-        ms.error('Error')
+        ms.error('Upload failed')
         console.error(error)
       }
     },
@@ -40,9 +40,9 @@ function uploadChat() {
       try {
         const chatStorage = JSON.parse(localStorage.getItem('chatStorage') || '{}')
         await post({url: '/v1/chat-storage', data: chatStorage})
-        ms.success('Success')
+        ms.success('Download success')
       } catch (error) {
-        ms.error('Error')
+        ms.error('Download failed')
         console.error(error)
       }
     },

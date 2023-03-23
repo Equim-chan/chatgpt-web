@@ -64,9 +64,10 @@ router.post('/v1/chat-storage', [auth, limiter], async (req, res) => {
 
   try {
     if (storage == null) {
-      res.write('{}')
+      res.json({ status: 'Success' })
       return
     }
+
     await storage.set('v1-chat-storage', req.body as Object)
 
     res.json({ status: 'Success' })

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { defineComponent, h } from 'vue'
+import { dequal } from 'dequal/lite'
 import {
   NDialogProvider,
   NLoadingBarProvider,
@@ -20,13 +21,13 @@ function registerNaiveTools() {
 }
 
 async function backgroundSync() {
-  let oldStateJSON = localStorage.getItem('chatStorage') || '{}'
+  let oldState = JSON.parse(localStorage.getItem('chatStorage') || '{}')
+  delete oldState.data?.active
 
   try {
-    const { data: body } = await get({ url: '/v1/chat-storage' })
-    const remoteJSON = JSON.stringify(body)
-
-    if (remoteJSON !== oldStateJSON) {
+    const { data: remoteState } = await get({ url: '/v1/chat-storage' })
+    delete remoteState.data?.active
+    if (!dequal(remoteState, oldState)) {
       const overrideLocal = await new Promise(resolve => {
         window.$dialog?.warning({
           title: 'Inconsistent Data',
@@ -42,7 +43,7 @@ async function backgroundSync() {
         window.$message?.warning('Auto upload is disabled')
         return
       }
-      localStorage.setItem('chatStorage', remoteJSON)
+      localStorage.setItem('chatStorage', JSON.stringify(remoteState))
       window.location.reload()
     }
   } catch (err) {
@@ -54,15 +55,17 @@ async function backgroundSync() {
   const interval = 3000
   window.$message?.info('Auto upload is enabled')
 
-  let recentStateJSON = oldStateJSON
+  let recentState = oldState
   setInterval(async () => {
     try {
-      const newStateJSON = localStorage.getItem('chatStorage') || '{}'
-      if (oldStateJSON !== newStateJSON && recentStateJSON === newStateJSON) {
-        await post({ url: '/v1/chat-storage', data: JSON.parse(newStateJSON) })
+      const newState = JSON.parse(localStorage.getItem('chatStorage') || '{}')
+      delete newState.data?.active
+      if (!dequal(oldState, newState) && dequal(recentState, newState)) {
+        await post({ url: '/v1/chat-storage', data: newState })
+        window.$message?.success('Upload success')
       }
-      oldStateJSON = recentStateJSON
-      recentStateJSON = newStateJSON
+      oldState = recentState
+      recentState = newState
     } catch (err) {
       window.$message?.error('Auto upload failed')
       console.error(err)

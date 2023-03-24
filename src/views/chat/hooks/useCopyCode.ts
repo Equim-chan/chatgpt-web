@@ -13,6 +13,7 @@ export function useCopyCode() {
             navigator.clipboard.writeText(codeBlock.textContent ?? '')
           else
             copyText({ text: codeBlock.textContent ?? '', origin: true })
+          window.$message?.success('Copied!')
         })
       }
     })

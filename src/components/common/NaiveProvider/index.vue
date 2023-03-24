@@ -36,6 +36,7 @@ async function backgroundSync() {
           negativeText: 'No',
           onPositiveClick: () => resolve(true),
           onNegativeClick: () => resolve(false),
+          onClose: () => resolve(false),
         })
       })
       if (!overrideLocal) {

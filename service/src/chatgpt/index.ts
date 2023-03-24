@@ -62,18 +62,6 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
       }
     }
 
-    if (isNotEmptyString(process.env.SYSTEM_MESSAGE)) {
-      let now = new Date()
-      now = new Date(now.getTime() - (now.getTimezoneOffset()*60*1000))
-      options.systemMessage = process.env.SYSTEM_MESSAGE + `\nCurrent date: ${now.toISOString().substring(0, 10)}`
-    }
-    if (isNotEmptyString(process.env.PARAMS_TEMPERATURE)) {
-      options.completionParams.temperature = parseFloat(process.env.PARAMS_TEMPERATURE)
-    }
-    if (isNotEmptyString(process.env.PARAMS_TOP_P)) {
-      options.completionParams.top_p = parseFloat(process.env.PARAMS_TOP_P)
-    }
-
     if (isNotEmptyString(OPENAI_API_BASE_URL))
       options.apiBaseUrl = OPENAI_API_BASE_URL
 
@@ -99,13 +87,17 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 })()
 
 async function chatReplyProcess(options: RequestOptions) {
-  const { message, lastContext, process, systemMessage } = options
+  const { message, lastContext, process, systemMessage, temperature, topP } = options
   try {
-    let options: SendMessageOptions = { timeoutMs }
+    let options: SendMessageOptions = { timeoutMs, completionParams: {} }
 
     if (apiModel === 'ChatGPTAPI') {
       if (isNotEmptyString(systemMessage))
         options.systemMessage = systemMessage
+      if (temperature != null)
+        options.completionParams.temperature = temperature
+      if (topP != null)
+        options.completionParams.top_p = topP
     }
 
     if (lastContext != null) {

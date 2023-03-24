@@ -20,6 +20,7 @@ function downloadChat() {
       nextTick(async () => {
         try {
           const { data: body } = await get({ url: '/v1/chat-storage' })
+          delete body.data?.active
           localStorage.setItem('chatStorage', JSON.stringify(body))
           ms.success('Download success')
           location.reload()
@@ -42,6 +43,7 @@ function uploadChat() {
       nextTick(async () => {
         try {
           const chatStorage = JSON.parse(localStorage.getItem('chatStorage') || '{}')
+          delete chatStorage.data?.active
           await post({url: '/v1/chat-storage', data: chatStorage})
           ms.success('Upload success')
         } catch (error) {

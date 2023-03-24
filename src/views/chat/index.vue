@@ -532,9 +532,10 @@ function handleKeydown(event: KeyboardEvent) {
         return
       }
     }
-    return
   }
+}
 
+function handleKeypress(event: KeyboardEvent) {
   if (!isMobile.value) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
@@ -692,6 +693,7 @@ onUnmounted(() => {
                 @input="handleInput"
                 @focus="handleFocus"
                 @blur="handleBlur"
+                @keypress="handleKeypress"
                 @keydown="handleKeydown"
               />
             </template>

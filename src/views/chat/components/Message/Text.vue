@@ -82,9 +82,10 @@ function handleKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') {
     event.preventDefault()
     handleCancel()
-    return
   }
+}
 
+function handleKeypress(event: KeyboardEvent) {
   if (!isMobile.value) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
@@ -120,6 +121,7 @@ defineExpose({ textRef, inputRef })
               type="textarea"
               :autosize="{ minRows: 5 }"
               @input="handleInput"
+              @keypress="handleKeypress"
               @keydown="handleKeydown"
             />
             <div class="chat-edit-buttons">

@@ -20,12 +20,11 @@ function registerNaiveTools() {
 }
 
 async function backgroundSync() {
-  let oldStateJSON = '{}'
+  let oldStateJSON = localStorage.getItem('chatStorage') || '{}'
 
   try {
     const { data: body } = await get({ url: '/v1/chat-storage' })
     const remoteJSON = JSON.stringify(body)
-    oldStateJSON = localStorage.getItem('chatStorage') || '{}'
 
     if (remoteJSON !== oldStateJSON) {
       const overrideLocal = await new Promise(resolve => {
@@ -52,17 +51,18 @@ async function backgroundSync() {
     return
   }
 
-  const interval = 10000
-  window.$message?.info(`Auto upload is enabled, interval ${interval} ms`)
+  const interval = 3000
+  window.$message?.info('Auto upload is enabled')
 
+  let recentStateJSON = oldStateJSON
   setInterval(async () => {
     try {
       const newStateJSON = localStorage.getItem('chatStorage') || '{}'
-      if (oldStateJSON === newStateJSON) {
-        return
+      if (oldStateJSON !== newStateJSON && recentStateJSON === newStateJSON) {
+        await post({ url: '/v1/chat-storage', data: JSON.parse(newStateJSON) })
       }
-      await post({ url: '/v1/chat-storage', data: JSON.parse(newStateJSON) })
-      oldStateJSON = newStateJSON
+      oldStateJSON = recentStateJSON
+      recentStateJSON = newStateJSON
     } catch (err) {
       window.$message?.error('Auto upload failed')
       console.error(err)

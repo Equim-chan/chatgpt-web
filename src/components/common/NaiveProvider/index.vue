@@ -57,7 +57,8 @@ async function backgroundSync() {
   window.$message?.info('Auto upload is enabled')
 
   let recentState = oldState
-  setInterval(async () => {
+  while (true) {
+    await new Promise(resolve => setTimeout(resolve, interval))
     try {
       const newState = JSON.parse(localStorage.getItem('chatStorage') || '{}')
       delete newState.data?.active
@@ -71,7 +72,7 @@ async function backgroundSync() {
       window.$message?.error('Auto upload failed')
       console.error(err)
     }
-  }, interval)
+  }
 }
 
 const NaiveProviderContent = defineComponent({

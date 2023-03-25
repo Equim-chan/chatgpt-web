@@ -43,6 +43,7 @@ async function backgroundSync() {
         window.$message?.warning('Auto upload is disabled')
         return
       }
+      remoteState.data.active = remoteState.data.history?.[0]?.uuid
       localStorage.setItem('chatStorage', JSON.stringify(remoteState))
       window.location.reload()
     }

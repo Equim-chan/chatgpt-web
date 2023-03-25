@@ -19,9 +19,9 @@ function downloadChat() {
     onPositiveClick: () => {
       nextTick(async () => {
         try {
-          const { data: body } = await get({ url: '/v1/chat-storage' })
-          delete body.data?.active
-          localStorage.setItem('chatStorage', JSON.stringify(body))
+          const { data: remoteState } = await get({ url: '/v1/chat-storage' })
+          remoteState.data.active = remoteState.data.history?.[0]?.uuid
+          localStorage.setItem('chatStorage', JSON.stringify(remoteState))
           ms.success('Download success')
           location.reload()
         } catch (error) {

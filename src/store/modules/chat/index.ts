@@ -2,6 +2,13 @@ import { defineStore } from 'pinia'
 import { getLocalState, setLocalState } from './helper'
 import { router } from '@/router'
 
+function truncate(text: string, length: number): string {
+  if (text.length > length + 3) {
+    return text.substring(0, length) + '...'
+  }
+  return text
+}
+
 export const useChatStore = defineStore('chat-store', {
   state: (): Chat.ChatState => getLocalState(),
 
@@ -96,7 +103,7 @@ export const useChatStore = defineStore('chat-store', {
       if (!uuid || uuid === 0) {
         if (this.history.length === 0) {
           const uuid = Date.now()
-          this.history.push({ uuid, title: chat.text, isEdit: false })
+          this.history.push({ uuid, title: truncate(chat.text, 32), isEdit: false })
           this.chat.push({ uuid, data: [chat] })
           this.active = uuid
           this.recordState()
@@ -104,7 +111,7 @@ export const useChatStore = defineStore('chat-store', {
         else {
           this.chat[0].data.push(chat)
           if (this.history[0].title === 'New Chat')
-            this.history[0].title = chat.text
+            this.history[0].title = truncate(chat.text, 32)
           this.recordState()
         }
       }
@@ -113,7 +120,7 @@ export const useChatStore = defineStore('chat-store', {
       if (index !== -1) {
         this.chat[index].data.push(chat)
         if (this.history[index].title === 'New Chat')
-          this.history[index].title = chat.text
+          this.history[index].title = truncate(chat.text, 32)
         this.recordState()
       }
     },

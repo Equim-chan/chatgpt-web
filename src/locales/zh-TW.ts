@@ -28,6 +28,7 @@ export default {
     unauthorizedTips: '未經授權，請先進行驗證。',
   },
   chat: {
+    newChatButton: '新建對話',
     placeholder: '來說點什麼...（Shift + Enter = 換行）',
     placeholderMobile: '來說點什麼...',
     copy: '複製',
@@ -73,6 +74,7 @@ export default {
     monthlyUsage: '本月用量',
   },
   store: {
+    siderButton: '提示詞商店',
     local: '本機',
     online: '線上',
     title: '標題',

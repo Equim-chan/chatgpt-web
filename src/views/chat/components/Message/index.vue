@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { computed, ref, nextTick } from 'vue'
+import { computed, ref, nextTick, onBeforeUnmount } from 'vue'
 import { NDropdown } from 'naive-ui'
 import AvatarComponent from './Avatar.vue'
 import TextComponent from './Text.vue'
@@ -40,6 +40,8 @@ const { iconRender } = useIconRender()
 const textRef = ref<InstanceType<typeof TextComponent>>()
 
 const edit = ref<boolean>(false)
+
+const origTextRef = ref<string | null>()
 
 const childValue = computed<string>({
   get() {
@@ -91,18 +93,30 @@ function handleRegenerate() {
 }
 
 function handleEdit() {
+  origTextRef.value = childValue.value
   edit.value = true
   nextTick(() => textRef.value?.inputRef?.focus())
 }
 
 function handleEditSubmit(text: string) {
+  origTextRef.value = ''
   emit('editSubmit', text)
   edit.value = false
 }
 
 function handleEditCancel() {
+  if (origTextRef.value != null) {
+    childValue.value = origTextRef.value
+    origTextRef.value = null
+  }
   edit.value = false
 }
+
+onBeforeUnmount(() => {
+  if (origTextRef.value != null) {
+    childValue.value = origTextRef.value
+  }
+})
 
 // for ArrowUp trigger
 defineExpose({ handleEdit })

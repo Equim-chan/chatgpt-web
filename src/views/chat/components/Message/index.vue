@@ -99,7 +99,7 @@ function handleEdit() {
 }
 
 function handleEditSubmit(text: string) {
-  origTextRef.value = ''
+  origTextRef.value = null
   emit('editSubmit', text)
   edit.value = false
 }

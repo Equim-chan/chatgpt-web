@@ -74,7 +74,7 @@ async function onConversation() {
   addChat(
     +uuid,
     {
-      dateTime: new Date().toLocaleString(),
+      dateTime: new Date().toLocaleString('zh-CN'),
       text: message,
       inversion: true,
       error: false,
@@ -96,7 +96,7 @@ async function onConversation() {
   addChat(
     +uuid,
     {
-      dateTime: new Date().toLocaleString(),
+      dateTime: new Date().toLocaleString('zh-CN'),
       text: '',
       loading: true,
       inversion: false,
@@ -128,7 +128,7 @@ async function onConversation() {
               +uuid,
               dataSources.value.length - 1,
               {
-                dateTime: new Date().toLocaleString(),
+                dateTime: new Date().toLocaleString('zh-CN'),
                 text: lastText + data.text ?? '',
                 inversion: false,
                 error: false,
@@ -191,7 +191,7 @@ async function onConversation() {
       +uuid,
       dataSources.value.length - 1,
       {
-        dateTime: new Date().toLocaleString(),
+        dateTime: new Date().toLocaleString('zh-CN'),
         text: errorMessage,
         inversion: false,
         error: true,
@@ -230,7 +230,7 @@ async function onEdit(text: string, index: number) {
   addChat(
     +uuid,
     {
-      dateTime: new Date().toLocaleString(),
+      dateTime: new Date().toLocaleString('zh-CN'),
       text: '',
       loading: true,
       inversion: false,
@@ -252,7 +252,7 @@ async function onEdit(text: string, index: number) {
           const xhr = event.target
           const { responseText } = xhr
           // Always process the final line
-          const lastIndex = responseText.lastIndexOf('\n')
+          const lastIndex = responseText.lastIndexOf('\n', responseText.length - 2)
           let chunk = responseText
           if (lastIndex !== -1)
             chunk = responseText.substring(lastIndex)
@@ -262,7 +262,7 @@ async function onEdit(text: string, index: number) {
               +uuid,
               dataSources.value.length - 1,
               {
-                dateTime: new Date().toLocaleString(),
+                dateTime: new Date().toLocaleString('zh-CN'),
                 text: lastText + data.text ?? '',
                 inversion: false,
                 error: false,
@@ -325,7 +325,7 @@ async function onEdit(text: string, index: number) {
       +uuid,
       dataSources.value.length - 1,
       {
-        dateTime: new Date().toLocaleString(),
+        dateTime: new Date().toLocaleString('zh-CN'),
         text: errorMessage,
         inversion: false,
         error: true,
@@ -363,7 +363,7 @@ async function onRegenerate(index: number) {
     +uuid,
     index,
     {
-      dateTime: new Date().toLocaleString(),
+      dateTime: new Date().toLocaleString('zh-CN'),
       text: '',
       inversion: false,
       error: false,
@@ -394,7 +394,7 @@ async function onRegenerate(index: number) {
               +uuid,
               index,
               {
-                dateTime: new Date().toLocaleString(),
+                dateTime: new Date().toLocaleString('zh-CN'),
                 text: lastText + data.text ?? '',
                 inversion: false,
                 error: false,
@@ -437,7 +437,7 @@ async function onRegenerate(index: number) {
       +uuid,
       index,
       {
-        dateTime: new Date().toLocaleString(),
+        dateTime: new Date().toLocaleString('zh-CN'),
         text: errorMessage,
         inversion: false,
         error: true,

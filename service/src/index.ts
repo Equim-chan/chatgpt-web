@@ -2,10 +2,9 @@ import express from 'express'
 import type { RequestProps } from './types'
 import type { ChatMessage } from './chatgpt'
 import { chatConfig, chatReplyProcess, currentModel } from './chatgpt'
-import { auth } from './middleware/auth'
+import { auth, checkAndGetUsername, hasAuth } from './middleware/auth'
 import { limiter } from './middleware/limiter'
-import { isNotEmptyString } from './utils/is'
-import storage from './store'
+import { historyStore } from './store'
 
 const app = express()
 const router = express.Router()
@@ -50,7 +49,8 @@ router.get('/v1/chat-storage', [auth, limiter], async (req, res) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8')
 
   try {
-    const chat = await storage.get('v1-chat-storage') || {}
+    const username = res.locals.username
+    const chat = await historyStore.get(username) || {}
     res.json({ data: chat, status: 'Success' })
   }
   catch (error) {
@@ -65,12 +65,13 @@ router.post('/v1/chat-storage', [auth, limiter], async (req, res) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8')
 
   try {
-    if (storage == null) {
+    if (historyStore == null) {
       res.json({ status: 'Success' })
       return
     }
 
-    await storage.set('v1-chat-storage', req.body as Object)
+    const username = res.locals.username
+    await historyStore.set(username, req.body as Object)
 
     res.json({ status: 'Success' })
   }
@@ -94,9 +95,7 @@ router.post('/config', auth, async (req, res) => {
 
 router.post('/session', async (req, res) => {
   try {
-    const AUTH_SECRET_KEY = process.env.AUTH_SECRET_KEY
-    const hasAuth = isNotEmptyString(AUTH_SECRET_KEY)
-    res.send({ status: 'Success', message: '', data: { auth: hasAuth, model: currentModel() } })
+    res.send({ status: 'Success', message: '', data: { auth: hasAuth(), model: currentModel() } })
   }
   catch (error) {
     res.send({ status: 'Fail', message: error.message, data: null })
@@ -109,7 +108,7 @@ router.post('/verify', async (req, res) => {
     if (!token)
       throw new Error('Secret key is empty')
 
-    if (process.env.AUTH_SECRET_KEY !== token)
+    if (checkAndGetUsername(token) == null)
       throw new Error('密钥无效 | Secret key is invalid')
 
     res.send({ status: 'Success', message: 'Verify successfully', data: null })

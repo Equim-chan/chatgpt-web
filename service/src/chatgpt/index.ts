@@ -10,7 +10,7 @@ import { sendResponse } from '../utils'
 import { isNotEmptyString } from '../utils/is'
 import type { ApiModel, ChatContext, ChatGPTUnofficialProxyAPIOptions, ModelConfig } from '../types'
 import type { RequestOptions } from './types'
-import storage from '../store'
+import { messageStore } from '../store'
 
 const { HttpsProxyAgent } = httpsProxyAgent
 
@@ -46,7 +46,7 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
       apiKey: process.env.OPENAI_API_KEY,
       completionParams: { model },
       debug: true,
-      messageStore: storage,
+      messageStore,
     }
 
     // increase max token limit if use gpt-4

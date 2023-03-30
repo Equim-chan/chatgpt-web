@@ -26,26 +26,28 @@ async function backgroundSync() {
 
   try {
     const { data: remoteState } = await get({ url: '/v1/chat-storage' })
-    delete remoteState.data?.active
-    if (!dequal(remoteState, oldState)) {
-      const overrideLocal = await new Promise(resolve => {
-        window.$dialog?.warning({
-          title: 'Inconsistent Data',
-          content: 'There are differences between your local and remote storage. Do you want to overwrite local data?',
-          positiveText: 'Yes',
-          negativeText: 'No',
-          onPositiveClick: () => resolve(true),
-          onNegativeClick: () => resolve(false),
-          onEsc: () => resolve(false),
+    if (remoteState.data) {
+      delete remoteState.data.active
+      if (!dequal(remoteState, oldState)) {
+        const overrideLocal = await new Promise(resolve => {
+          window.$dialog?.warning({
+            title: 'Inconsistent Data',
+            content: 'There are differences between your local and remote storage. Do you want to overwrite local data?',
+            positiveText: 'Yes',
+            negativeText: 'No',
+            onPositiveClick: () => resolve(true),
+            onNegativeClick: () => resolve(false),
+            onEsc: () => resolve(false),
+          })
         })
-      })
-      if (!overrideLocal) {
-        window.$message?.warning('Auto upload is disabled')
-        return
+        if (!overrideLocal) {
+          window.$message?.warning('Auto upload is disabled')
+          return
+        }
+        remoteState.data.active = remoteState.data.history?.[0]?.uuid
+        localStorage.setItem('chatStorage', JSON.stringify(remoteState))
+        window.location.reload()
       }
-      remoteState.data.active = remoteState.data.history?.[0]?.uuid
-      localStorage.setItem('chatStorage', JSON.stringify(remoteState))
-      window.location.reload()
     }
   } catch (err) {
     window.$message?.error('Download failed')

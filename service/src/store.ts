@@ -4,10 +4,15 @@ import { isNotEmptyString } from './utils/is'
 
 dotenv.config()
 
-let storage: Keyv | null
-if (isNotEmptyString(process.env.POSTGRES_URL) && isNotEmptyString(process.env.POSTGRES_TABLE)) {
-  const keyvOpts = { table: process.env.POSTGRES_TABLE }
-  storage = new Keyv(process.env.POSTGRES_URL, keyvOpts)
+let messageStore: Keyv | null
+let historyStore: Keyv | null
+
+const POSTGRES_URL = process.env.POSTGRES_URL
+const POSTGRES_TABLE_PREFIX = process.env.POSTGRES_TABLE_PREFIX
+
+if (isNotEmptyString(POSTGRES_URL) && isNotEmptyString(POSTGRES_TABLE_PREFIX)) {
+  messageStore = new Keyv(POSTGRES_URL, { table: `${POSTGRES_TABLE_PREFIX}_message` })
+  historyStore = new Keyv(POSTGRES_URL, { table: `${POSTGRES_TABLE_PREFIX}_history` })
 }
 
-export default storage
+export { messageStore, historyStore }

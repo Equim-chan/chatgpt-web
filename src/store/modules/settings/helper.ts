@@ -13,7 +13,7 @@ export function defaultSetting(): SettingsState {
   return {
     systemMessage: `You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible.\nKnowledge cutoff: 2021-09-01\nCurrent date: ${currentDate}`,
     temperature: 1.0,
-    topP: 0.75,
+    topP: 0.95,
   }
 }
 

@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { NButton, NInput, NPopconfirm, NSelect, useMessage } from 'naive-ui'
+import { computed, ref, nextTick } from 'vue'
+import { NButton, NInput, NPopconfirm, NSelect, useMessage, useDialog } from 'naive-ui'
 import type { Language, Theme } from '@/store/modules/app/helper'
 import { SvgIcon } from '@/components/common'
 import { useAppStore, useUserStore } from '@/store'
 import type { UserInfo } from '@/store/modules/user/helper'
 import { getCurrentDate } from '@/utils/functions'
+import { get, post } from '@/utils/request'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { t } from '@/locales'
 
@@ -15,6 +16,8 @@ const userStore = useUserStore()
 const { isMobile } = useBasicLayout()
 
 const ms = useMessage()
+
+const dialog = useDialog()
 
 const theme = computed(() => appStore.theme)
 
@@ -110,6 +113,51 @@ function importData(event: Event): void {
   reader.readAsText(file)
 }
 
+function uploadData() {
+  dialog.warning({
+    title: 'Upload',
+    content: 'Upload to server and override remote data?',
+    positiveText: 'Yes',
+    negativeText: 'No',
+    onPositiveClick: () => {
+      nextTick(async () => {
+        try {
+          const chatStorage = JSON.parse(localStorage.getItem('chatStorage') || '{}')
+          delete chatStorage.data?.active
+          await post({ url: '/v1/chat-storage', data: chatStorage })
+          ms.success('Upload success')
+        } catch (error) {
+          ms.error('Upload failed')
+          console.error(error)
+        }
+      })
+    },
+  })
+}
+
+function downloadData() {
+  dialog.warning({
+    title: 'Download',
+    content: 'Download from server and override local data?',
+    positiveText: 'Yes',
+    negativeText: 'No',
+    onPositiveClick: () => {
+      nextTick(async () => {
+        try {
+          const { data: remoteState } = await get({ url: '/v1/chat-storage' })
+          remoteState.data.active = remoteState.data.history?.[0]?.uuid
+          localStorage.setItem('chatStorage', JSON.stringify(remoteState))
+          ms.success('Download success')
+          location.reload()
+        } catch (error) {
+          ms.error('Download failed')
+          console.error(error)
+        }
+      })
+    },
+  })
+}
+
 function clearData(): void {
   localStorage.removeItem('chatStorage')
   location.reload()
@@ -181,6 +229,20 @@ function handleImportButtonClick(): void {
               <SvgIcon icon="ri:download-2-fill" />
             </template>
             {{ $t('common.import') }}
+          </NButton>
+
+          <NButton size="small" @click="uploadData">
+            <template #icon>
+              <SvgIcon icon="ri:upload-cloud-2-fill" />
+            </template>
+            Upload
+          </NButton>
+
+          <NButton size="small" @click="downloadData">
+            <template #icon>
+              <SvgIcon icon="ri:download-cloud-2-fill" />
+            </template>
+            Download
           </NButton>
 
           <NPopconfirm placement="bottom" @positive-click="clearData">

@@ -334,7 +334,6 @@ async function onEdit(text: string, index: number) {
         requestOptions: { prompt: message, options: { ...options } },
       },
     )
-    scrollToBottomIfAtBottom()
   }
   finally {
     loading.value = false

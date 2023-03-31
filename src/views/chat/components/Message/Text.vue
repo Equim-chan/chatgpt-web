@@ -107,27 +107,25 @@ defineExpose({ inputRef })
 <template>
   <div :class="wrapClass">
     <div class="leading-relaxed break-words">
-      <template v-if="edit">
-        <div class="whitespace-pre-wrap">
-          <NInput
-            ref="inputRef"
-            :value="text"
-            type="textarea"
-            :autosize="{ minRows: 5 }"
-            @input="handleInput"
-            @keypress="handleKeypress"
-            @keydown="handleKeydown"
-          />
-          <div class="chat-edit-buttons">
-            <NButton type="primary" @click="handleSubmit">
-              {{ t('chat.saveAndSubmit') }}
-            </NButton>
-            <NButton @click="handleCancel">
-              {{ t('chat.cancel') }}
-            </NButton>
-          </div>
+      <div v-if="edit" class="whitespace-pre-wrap">
+        <NInput
+          ref="inputRef"
+          :value="text"
+          type="textarea"
+          :autosize="{ minRows: 5 }"
+          @input="handleInput"
+          @keypress="handleKeypress"
+          @keydown="handleKeydown"
+        />
+        <div class="chat-edit-buttons">
+          <NButton type="primary" @click="handleSubmit">
+            {{ t('chat.saveAndSubmit') }}
+          </NButton>
+          <NButton @click="handleCancel">
+            {{ t('chat.cancel') }}
+          </NButton>
         </div>
-      </template>
+      </div>
       <div v-else class="flex items-end">
         <div v-if="!asRawText && !edit" class="markdown-body" v-html="text" />
         <div v-else class="whitespace-pre-wrap" v-text="text" />

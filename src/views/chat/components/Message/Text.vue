@@ -128,13 +128,11 @@ defineExpose({ inputRef })
           </div>
         </div>
       </template>
-      <template v-else>
+      <div v-else class="flex items-end">
         <div v-if="!asRawText && !edit" class="markdown-body" v-html="text" />
         <div v-else class="whitespace-pre-wrap" v-text="text" />
-        <template v-if="loading">
-          <span class="dark:text-white w-[4px] h-[20px] block animate-blink" />
-        </template>
-      </template>
+        <span v-if="loading" class="dark:text-white w-[4px] h-[20px] block animate-blink" />
+      </div>
     </div>
   </div>
 </template>

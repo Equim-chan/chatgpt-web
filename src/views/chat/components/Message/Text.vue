@@ -106,38 +106,36 @@ defineExpose({ inputRef })
 
 <template>
   <div :class="wrapClass">
-    <template v-if="loading">
-      <span class="dark:text-white w-[4px] h-[20px] block animate-blink" />
-    </template>
-    <template v-else>
-      <div class="leading-relaxed break-words">
-        <template v-if="edit">
-          <div class="whitespace-pre-wrap">
-            <NInput
-              ref="inputRef"
-              :value="text"
-              type="textarea"
-              :autosize="{ minRows: 5 }"
-              @input="handleInput"
-              @keypress="handleKeypress"
-              @keydown="handleKeydown"
-            />
-            <div class="chat-edit-buttons">
-              <NButton type="primary" @click="handleSubmit">
-                {{ t('chat.saveAndSubmit') }}
-              </NButton>
-              <NButton @click="handleCancel">
-                {{ t('chat.cancel') }}
-              </NButton>
-            </div>
+    <div class="leading-relaxed break-words">
+      <template v-if="edit">
+        <div class="whitespace-pre-wrap">
+          <NInput
+            ref="inputRef"
+            :value="text"
+            type="textarea"
+            :autosize="{ minRows: 5 }"
+            @input="handleInput"
+            @keypress="handleKeypress"
+            @keydown="handleKeydown"
+          />
+          <div class="chat-edit-buttons">
+            <NButton type="primary" @click="handleSubmit">
+              {{ t('chat.saveAndSubmit') }}
+            </NButton>
+            <NButton @click="handleCancel">
+              {{ t('chat.cancel') }}
+            </NButton>
           </div>
+        </div>
+      </template>
+      <template v-else>
+        <div v-if="!asRawText && !edit" class="markdown-body" v-html="text" />
+        <div v-else class="whitespace-pre-wrap" v-text="text" />
+        <template v-if="loading">
+          <span class="dark:text-white w-[4px] h-[20px] block animate-blink" />
         </template>
-        <template v-else>
-          <div v-if="!asRawText && !edit" class="markdown-body" v-html="text" />
-          <div v-else class="whitespace-pre-wrap" v-text="text" />
-        </template>
-      </div>
-    </template>
+      </template>
+    </div>
   </div>
 </template>
 

@@ -25,7 +25,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   try {
     const { prompt, options = {}, systemMessage, temperature, topP } = req.body as RequestProps
     let firstChunk = true
-    await chatReplyProcess({
+    const finalResponse = await chatReplyProcess({
       message: prompt,
       lastContext: options,
       process: (chat: ChatMessage) => {
@@ -36,6 +36,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
       temperature,
       topP,
     })
+    res.write(firstChunk ? JSON.stringify(finalResponse) : `\n${JSON.stringify(finalResponse)}`)
   }
   catch (error) {
     res.json(error)

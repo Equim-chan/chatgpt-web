@@ -77,8 +77,9 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
       debug: !disableDebug,
     }
 
-    if (isNotEmptyString(process.env.API_REVERSE_PROXY))
-      options.apiReverseProxyUrl = process.env.API_REVERSE_PROXY
+    options.apiReverseProxyUrl = isNotEmptyString(process.env.API_REVERSE_PROXY)
+      ? process.env.API_REVERSE_PROXY
+      : 'https://bypass.churchless.tech/api/conversation'
 
     setupProxy(options)
 

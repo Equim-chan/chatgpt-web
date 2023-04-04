@@ -16,12 +16,14 @@ if (PASSWD_FILE) {
   }
 }
 
-const hasAuth = () => userMap.size > 0
+function hasAuth() {
+  return userMap.size > 0
+}
 
-const checkAndGetUsername = async (token) => {
+async function checkAndGetUsername(token) {
   try {
     const [username, password] = token.split(':')
-    if (!hasAuth) {
+    if (!hasAuth()) {
       return username
     }
     const hash = userMap.get(username)
@@ -33,16 +35,16 @@ const checkAndGetUsername = async (token) => {
   return null
 }
 
-const auth = async (req, res, next) => {
-  if (hasAuth) {
+async function auth(req, res, next) {
+  if (hasAuth()) {
     try {
       // actually should be Basic instead of Bearer but I'm lazy
       const token = req.header('Authorization')?.replace('Bearer ', '').trim()
-      const username = await checkAndGetUsername(token)
-      if (username == null) {
+      const verifiedUsername = await checkAndGetUsername(token)
+      if (verifiedUsername == null) {
         throw new Error('Error: 无访问权限 | No access rights')
       }
-      res.locals.username = username
+      res.locals.username = verifiedUsername
       next()
     }
     catch (error) {

@@ -27,6 +27,8 @@ const avatar = ref(userInfo.value.avatar ?? '')
 
 const name = ref(userInfo.value.name ?? '')
 
+const aiAvatar = ref(userInfo.value.aiAvatar ?? '')
+
 const aiName = ref(userInfo.value.aiName ?? '')
 
 const description = ref(userInfo.value.description ?? '')
@@ -188,6 +190,15 @@ function handleImportButtonClick(): void {
           <NInput v-model:value="name" placeholder="" />
         </div>
         <NButton size="tiny" text type="primary" @click="updateUserInfo({ name })">
+          {{ $t('common.save') }}
+        </NButton>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span class="flex-shrink-0 w-[100px]">{{ $t('setting.aiAvatarLink') }}</span>
+        <div class="flex-1">
+          <NInput v-model:value="aiAvatar" placeholder="" />
+        </div>
+        <NButton size="tiny" text type="primary" @click="updateUserInfo({ aiAvatar })">
           {{ $t('common.save') }}
         </NButton>
       </div>

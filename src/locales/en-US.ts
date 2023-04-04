@@ -62,6 +62,7 @@ export default {
     config: 'Config',
     avatarLink: 'Avatar Link',
     name: 'Name',
+    aiAvatarLink: 'AI Avatar Link',
     aiName: 'AI Name',
     description: 'Description',
     role: 'Role',

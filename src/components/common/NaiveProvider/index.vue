@@ -12,6 +12,7 @@ import {
   useNotification,
 } from 'naive-ui'
 import { get, post } from '@/utils/request'
+import { t } from '@/locales'
 
 function registerNaiveTools() {
   window.$loadingBar = useLoadingBar()
@@ -31,17 +32,17 @@ async function backgroundSync() {
       if (!dequal(remoteState, oldState)) {
         const overrideLocal = await new Promise(resolve => {
           window.$dialog?.warning({
-            title: 'Inconsistent Data',
-            content: 'There are differences between your local and remote storage. Do you want to overwrite local data?',
-            positiveText: 'Yes',
-            negativeText: 'No',
+            title: t('sync.inconsistentData'),
+            content: t('sync.inconsistentDataPrompt'),
+            positiveText: t('common.yes'),
+            negativeText: t('common.no'),
             onPositiveClick: () => resolve(true),
             onNegativeClick: () => resolve(false),
             onEsc: () => resolve(false),
           })
         })
         if (!overrideLocal) {
-          window.$message?.warning('Auto upload is disabled')
+          window.$message?.warning(t('sync.autoUpload.disabled'))
           return
         }
         remoteState.data.active = remoteState.data.history?.[0]?.uuid
@@ -50,13 +51,13 @@ async function backgroundSync() {
       }
     }
   } catch (err) {
-    window.$message?.error('Download failed')
+    window.$message?.error(t('sync.download.failed'))
     console.error(err)
     return
   }
 
   const interval = 3000
-  window.$message?.info('Auto upload is enabled')
+  window.$message?.warning(t('sync.autoUpload.enabled'))
 
   let recentState = oldState
   while (true) {
@@ -66,12 +67,12 @@ async function backgroundSync() {
       delete newState.data?.active
       if (!dequal(oldState, newState) && dequal(recentState, newState)) {
         await post({ url: '/v1/chat-storage', data: newState })
-        window.$message?.success('Upload success')
+        window.$message?.success(t('sync.autoUpload.success'))
       }
       oldState = recentState
       recentState = newState
     } catch (err) {
-      window.$message?.error('Auto upload failed')
+      window.$message?.error(t('sync.autoUpload.failed'))
       console.error(err)
     }
   }

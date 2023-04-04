@@ -19,6 +19,7 @@ export default {
     yes: '是',
     no: '否',
     confirm: '确定',
+    upload: '上传',
     download: '下载',
     noData: '暂无数据',
     wrong: '好像出错了，请稍后再试。',
@@ -52,6 +53,7 @@ export default {
     showRawText: '显示原文',
     saveAndSubmit: '保存并提交',
     cancel: '取消',
+    stopResponding: '停止回答',
   },
   setting: {
     setting: '设置',
@@ -92,5 +94,25 @@ export default {
     importRepeatContent: '内容重复跳过：{msg}',
     onlineImportWarning: '注意：请检查 JSON 文件来源！',
     downloadError: '请检查网络状态与 JSON 文件有效性',
+  },
+  sync: {
+    inconsistentData: '数据不一致',
+    inconsistentDataPrompt: '您的本地和远程存储之间存在差异。您要覆盖本地数据吗？',
+    autoUpload: {
+      disabled: '自动上传已禁用',
+      enabled: '自动上传已启用',
+      success: '自动上传成功',
+      failed: '自动上传失败',
+    },
+    upload: {
+      prompt: '上传到服务器并覆盖远程数据？',
+      success: '上传成功',
+      failed: '上传失败',
+    },
+    download: {
+      prompt: '从服务器下载并覆盖本地数据？',
+      success: '下载成功',
+      failed: '下载失败',
+    },
   },
 }

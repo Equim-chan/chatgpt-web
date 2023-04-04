@@ -115,19 +115,19 @@ function importData(event: Event): void {
 
 function uploadData() {
   dialog.warning({
-    title: 'Upload',
-    content: 'Upload to server and override remote data?',
-    positiveText: 'Yes',
-    negativeText: 'No',
+    title: t('common.upload'),
+    content: t('sync.upload.prompt'),
+    positiveText: t('common.yes'),
+    negativeText: t('common.no'),
     onPositiveClick: () => {
       nextTick(async () => {
         try {
           const chatStorage = JSON.parse(localStorage.getItem('chatStorage') || '{}')
           delete chatStorage.data?.active
           await post({ url: '/v1/chat-storage', data: chatStorage })
-          ms.success('Upload success')
+          ms.success(t('sync.upload.success'))
         } catch (error) {
-          ms.error('Upload failed')
+          ms.error(t('sync.upload.failed'))
           console.error(error)
         }
       })
@@ -137,20 +137,20 @@ function uploadData() {
 
 function downloadData() {
   dialog.warning({
-    title: 'Download',
-    content: 'Download from server and override local data?',
-    positiveText: 'Yes',
-    negativeText: 'No',
+    title: t('common.download'),
+    content: t('sync.download.prompt'),
+    positiveText: t('common.yes'),
+    negativeText: t('common.no'),
     onPositiveClick: () => {
       nextTick(async () => {
         try {
           const { data: remoteState } = await get({ url: '/v1/chat-storage' })
           remoteState.data.active = remoteState.data.history?.[0]?.uuid
           localStorage.setItem('chatStorage', JSON.stringify(remoteState))
-          ms.success('Download success')
+          ms.success(t('sync.download.success'))
           location.reload()
         } catch (error) {
-          ms.error('Download failed')
+          ms.error(t('sync.download.failed'))
           console.error(error)
         }
       })
@@ -235,14 +235,14 @@ function handleImportButtonClick(): void {
             <template #icon>
               <SvgIcon icon="ri:upload-cloud-2-fill" />
             </template>
-            Upload
+            {{ $t('common.upload') }}
           </NButton>
 
           <NButton size="small" @click="downloadData">
             <template #icon>
               <SvgIcon icon="ri:download-cloud-2-fill" />
             </template>
-            Download
+            {{ $t('common.download') }}
           </NButton>
 
           <NPopconfirm placement="bottom" @positive-click="clearData">

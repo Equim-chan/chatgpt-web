@@ -19,6 +19,7 @@ export default {
     yes: 'Yes',
     no: 'No',
     confirm: 'Confirm',
+    upload: 'Upload',
     download: 'Download',
     noData: 'No Data',
     wrong: 'Something went wrong, please try again later.',
@@ -52,6 +53,7 @@ export default {
     showRawText: 'Show as raw text',
     saveAndSubmit: 'Save & Submit',
     cancel: 'Cancel',
+    stopResponding: 'Stop Responding',
   },
   setting: {
     setting: 'Setting',
@@ -92,5 +94,25 @@ export default {
     importRepeatContent: 'Content is repeatedly skipped: {msg}',
     onlineImportWarning: 'Note: Please check the JSON file source!',
     downloadError: 'Please check the network status and JSON file validity',
+  },
+  sync: {
+    inconsistentData: 'Inconsistent Data',
+    inconsistentDataPrompt: 'There are differences between your local and remote storage. Do you want to overwrite local data?',
+    autoUpload: {
+      disabled: 'Auto upload is disabled',
+      enabled: 'Auto upload is enabled',
+      success: 'Auto upload success',
+      failed: 'Auto upload failed',
+    },
+    upload: {
+      prompt: 'Upload to server and override remote data?',
+      success: 'Upload success',
+      failed: 'Upload failed',
+    },
+    download: {
+      prompt: 'Download from server and override local data?',
+      success: 'Download success',
+      failed: 'Download failed',
+    },
   },
 }

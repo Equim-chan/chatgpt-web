@@ -19,6 +19,7 @@ export default {
     yes: '是',
     no: '否',
     confirm: '確認',
+    upload: '上傳',
     download: '下載',
     noData: '目前無資料',
     wrong: '發生錯誤，請稍後再試。',
@@ -50,6 +51,7 @@ export default {
     saveAndSubmit: '保存並提交',
     cancel: '取消',
     clearHistoryConfirm: '確定清除紀錄?',
+    stopResponding: '停止回應',
   },
   setting: {
     setting: '設定',
@@ -90,5 +92,25 @@ export default {
     importRepeatContent: '因內容重複跳過：{msg}',
     onlineImportWarning: '注意：請檢查 JSON 檔案來源！',
     downloadError: '請檢查網路狀態與 JSON 檔案有效性',
+  },
+  sync: {
+    inconsistentData: '數據不一致',
+    inconsistentDataPrompt: '你本地和遠程存儲之間存在差異。是否要覆蓋本地數據？',
+    autoUpload: {
+      disabled: '自動上傳已禁用',
+      enabled: '自動上傳已啟用',
+      success: '自動上傳成功',
+      failed: '自動上傳失敗',
+    },
+    upload: {
+      prompt: '上傳到服務器並覆蓋遠程數據？',
+      success: '上傳成功',
+      failed: '上傳失敗',
+    },
+    download: {
+      prompt: '從服務器下載並覆蓋本地數據？',
+      success: '下載成功',
+      failed: '下載失敗',
+    },
   },
 }

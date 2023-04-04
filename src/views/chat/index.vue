@@ -66,10 +66,8 @@ async function onConversation() {
   if (loading.value)
     return
 
-  if (!message || message.trim() === '')
+  if (!message || message.trim().length === 0)
     return
-
-  controller = new AbortController()
 
   addChat(
     +uuid,
@@ -79,17 +77,43 @@ async function onConversation() {
       inversion: true,
       error: false,
       conversationOptions: null,
-      requestOptions: { prompt: message, options: null },
     },
   )
   scrollToBottom()
 
+  await makeConversation(message)
+}
+
+async function onEdit(text: string, index: number) {
+  if (loading.value)
+    return
+
+  let message = text
+  if (!message || message.trim().length === 0)
+    return
+
+  dataSources.value.splice(index + 1)
+
+  await makeConversation(message)
+}
+
+async function onRegenerate(index: number) {
+  if (loading.value)
+    return
+
+  dataSources.value.splice(index)
+  const { text } = dataSources.value[index - 1]
+
+  await makeConversation(text)
+}
+
+async function makeConversation(message: string) {
+  controller = new AbortController()
   loading.value = true
   prompt.value = ''
 
   let options: Chat.ConversationRequest = {}
   const lastContext = conversationList.value[conversationList.value.length - 1]?.conversationOptions
-
   if (lastContext && usingContext.value)
     options = { ...lastContext }
 
@@ -102,7 +126,6 @@ async function onConversation() {
       inversion: false,
       error: false,
       conversationOptions: null,
-      requestOptions: { prompt: message, options: { ...options } },
     },
   )
   scrollToBottom()
@@ -134,7 +157,6 @@ async function onConversation() {
                 error: false,
                 loading: true,
                 conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
-                requestOptions: { prompt: message, options: { ...options } },
               },
             )
 
@@ -149,140 +171,6 @@ async function onConversation() {
           }
           catch (error) {
             //
-          }
-        },
-      })
-      updateChatSome(+uuid, dataSources.value.length - 1, { loading: false })
-    }
-
-    await fetchChatAPIOnce()
-  }
-  catch (error: any) {
-    const errorMessage = error?.message ?? t('common.wrong')
-
-    if (error.message === 'canceled') {
-      updateChatSome(
-        +uuid,
-        dataSources.value.length - 1,
-        {
-          loading: false,
-        },
-      )
-      scrollToBottom()
-      return
-    }
-
-    const currentChat = getChatByUuidAndIndex(+uuid, dataSources.value.length - 1)
-
-    if (currentChat?.text && currentChat.text !== '') {
-      updateChatSome(
-        +uuid,
-        dataSources.value.length - 1,
-        {
-          text: `${currentChat.text}\n[${errorMessage}]`,
-          error: false,
-          loading: false,
-        },
-      )
-      return
-    }
-
-    updateChat(
-      +uuid,
-      dataSources.value.length - 1,
-      {
-        dateTime: new Date().toLocaleString('zh-CN'),
-        text: errorMessage,
-        inversion: false,
-        error: true,
-        loading: false,
-        conversationOptions: null,
-        requestOptions: { prompt: message, options: { ...options } },
-      },
-    )
-    scrollToBottom()
-  }
-  finally {
-    loading.value = false
-  }
-}
-
-async function onEdit(text: string, index: number) {
-  if (loading.value)
-    return
-  dataSources.value.splice(index + 1)
-
-  let message = text
-  if (!message || message.trim() === '')
-    return
-
-  controller = new AbortController()
-
-  loading.value = true
-  prompt.value = ''
-
-  let options: Chat.ConversationRequest = {}
-  const lastContext = conversationList.value[conversationList.value.length - 1]?.conversationOptions
-
-  if (lastContext && usingContext.value)
-    options = { ...lastContext }
-
-  addChat(
-    +uuid,
-    {
-      dateTime: new Date().toLocaleString('zh-CN'),
-      text: '',
-      loading: true,
-      inversion: false,
-      error: false,
-      conversationOptions: null,
-      requestOptions: { prompt: message, options: { ...options } },
-    },
-  )
-  scrollToBottom()
-
-  try {
-    let lastText = ''
-    const fetchChatAPIOnce = async () => {
-      await fetchChatAPIProcess<Chat.ConversationResponse>({
-        prompt: message,
-        options,
-        signal: controller.signal,
-        onDownloadProgress: ({ event }) => {
-          const xhr = event.target
-          const { responseText } = xhr
-          // Always process the final line
-          const lastIndex = responseText.lastIndexOf('\n', responseText.length - 2)
-          let chunk = responseText
-          if (lastIndex !== -1)
-            chunk = responseText.substring(lastIndex)
-          try {
-            const data = JSON.parse(chunk)
-            updateChat(
-              +uuid,
-              dataSources.value.length - 1,
-              {
-                dateTime: new Date().toLocaleString('zh-CN'),
-                text: lastText + (data.text ?? ''),
-                inversion: false,
-                error: false,
-                loading: true,
-                conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
-                requestOptions: { prompt: message, options: { ...options } },
-              },
-            )
-
-            if (openLongReply && data.detail.choices[0].finish_reason === 'length') {
-              options.parentMessageId = data.id
-              lastText = data.text
-              message = ''
-              return fetchChatAPIOnce()
-            }
-
-            scrollToBottomIfAtBottom()
-          }
-          catch (error) {
-          //
           }
         },
       })
@@ -331,121 +219,9 @@ async function onEdit(text: string, index: number) {
         error: true,
         loading: false,
         conversationOptions: null,
-        requestOptions: { prompt: message, options: { ...options } },
       },
     )
-  }
-  finally {
-    loading.value = false
-  }
-}
-
-async function onRegenerate(index: number) {
-  if (loading.value)
-    return
-  dataSources.value.splice(index + 1)
-
-  controller = new AbortController()
-
-  const { requestOptions } = dataSources.value[index]
-
-  let message = requestOptions?.prompt ?? ''
-
-  let options: Chat.ConversationRequest = {}
-
-  if (requestOptions.options)
-    options = { ...requestOptions.options }
-
-  loading.value = true
-
-  updateChat(
-    +uuid,
-    index,
-    {
-      dateTime: new Date().toLocaleString('zh-CN'),
-      text: '',
-      inversion: false,
-      error: false,
-      loading: true,
-      conversationOptions: null,
-      requestOptions: { prompt: message, options: { ...options } },
-    },
-  )
-
-  try {
-    let lastText = ''
-    const fetchChatAPIOnce = async () => {
-      await fetchChatAPIProcess<Chat.ConversationResponse>({
-        prompt: message,
-        options,
-        signal: controller.signal,
-        onDownloadProgress: ({ event }) => {
-          const xhr = event.target
-          const { responseText } = xhr
-          // Always process the final line
-          const lastIndex = responseText.lastIndexOf('\n', responseText.length - 2)
-          let chunk = responseText
-          if (lastIndex !== -1)
-            chunk = responseText.substring(lastIndex)
-          try {
-            const data = JSON.parse(chunk)
-            updateChat(
-              +uuid,
-              index,
-              {
-                dateTime: new Date().toLocaleString('zh-CN'),
-                text: lastText + (data.text ?? ''),
-                inversion: false,
-                error: false,
-                loading: true,
-                conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
-                requestOptions: { prompt: message, options: { ...options } },
-              },
-            )
-
-            if (openLongReply && data.detail.choices[0].finish_reason === 'length') {
-              options.parentMessageId = data.id
-              lastText = data.text
-              message = ''
-              return fetchChatAPIOnce()
-            }
-          }
-          catch (error) {
-            //
-          }
-        },
-      })
-      updateChatSome(+uuid, index, { loading: false })
-    }
-    await fetchChatAPIOnce()
-  }
-  catch (error: any) {
-    if (error.message === 'canceled') {
-      updateChatSome(
-        +uuid,
-        index,
-        {
-          loading: false,
-        },
-      )
-      return
-    }
-
-    const errorMessage = error?.message ?? t('common.wrong')
-
-    updateChat(
-      +uuid,
-      index,
-      {
-        dateTime: new Date().toLocaleString('zh-CN'),
-        text: errorMessage,
-        inversion: false,
-        error: true,
-        loading: false,
-        conversationOptions: null,
-        requestOptions: { prompt: message, options: { ...options } },
-      },
-    )
+    scrollToBottomIfAtBottom()
   }
   finally {
     loading.value = false
@@ -652,7 +428,7 @@ onUnmounted(() => {
                   <template #icon>
                     <SvgIcon icon="ri:stop-circle-line" />
                   </template>
-                  Stop Responding
+                  {{ t('chat.stopResponding') }}
                 </NButton>
               </div>
             </div>

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { computed, ref, nextTick } from 'vue'
-import { NButton, NInput, NPopconfirm, NSelect, useMessage, useDialog } from 'naive-ui'
+import { computed, nextTick, ref } from 'vue'
+import { NButton, NInput, NPopconfirm, NSelect, useDialog, useMessage } from 'naive-ui'
 import type { Language, Theme } from '@/store/modules/app/helper'
 import { SvgIcon } from '@/components/common'
 import { useAppStore, useUserStore } from '@/store'
@@ -128,7 +128,8 @@ function uploadData() {
           delete chatStorage.data?.active
           await post({ url: '/v1/chat-storage', data: chatStorage })
           ms.success(t('sync.upload.success'))
-        } catch (error) {
+        }
+        catch (error) {
           ms.error(t('sync.upload.failed'))
           console.error(error)
         }
@@ -151,7 +152,8 @@ function downloadData() {
           localStorage.setItem('chatStorage', JSON.stringify(remoteState))
           ms.success(t('sync.download.success'))
           location.reload()
-        } catch (error) {
+        }
+        catch (error) {
           ms.error(t('sync.download.failed'))
           console.error(error)
         }

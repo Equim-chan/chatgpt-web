@@ -65,8 +65,24 @@
 	}
 }
 
-html.dark {
+@keyframes cursor-blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
 
+.loading .markdown-body > :last-child::after {
+    content: "";
+    width: 5px;
+    height: 20px;
+    position: relative;
+    background: rgb(36, 41, 47);
+    right: -0.2em;
+    display: inline-block;
+    animation: cursor-blink 1s step-end infinite;
+}
+
+html.dark {
 	.message-reply {
 		.whitespace-pre-wrap {
 			white-space: pre-wrap;
@@ -78,4 +94,8 @@ html.dark {
 	pre {
 		background-color: #22272e;
 	}
+
+    .loading .markdown-body > :last-child::after {
+        background: rgb(201, 209, 217);
+    }
 }

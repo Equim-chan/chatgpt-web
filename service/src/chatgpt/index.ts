@@ -9,8 +9,8 @@ import axios from 'axios'
 import { sendResponse } from '../utils'
 import { isNotEmptyString } from '../utils/is'
 import type { ApiModel, ChatContext, ChatGPTUnofficialProxyAPIOptions, ModelConfig } from '../types'
-import type { RequestOptions } from './types'
 import { messageStore } from '../store'
+import type { RequestOptions } from './types'
 
 const { HttpsProxyAgent } = httpsProxyAgent
 
@@ -167,8 +167,8 @@ async function fetchMonthlyUsage() {
   try {
     const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_API_KEY}` }
     const params = {
-      'start_date': startOfMonth.toISOString().substring(0, 10),
-      'end_date': startOfNextMonth.toISOString().substring(0, 10),
+      start_date: startOfMonth.toISOString().substring(0, 10),
+      end_date: startOfNextMonth.toISOString().substring(0, 10),
     }
     const response = await axios.get(`${API_BASE_URL}/dashboard/billing/usage`, { headers, params })
     const monthlyUsage = (response.data.total_usage ?? 0) / 100

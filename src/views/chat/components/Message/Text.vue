@@ -54,13 +54,16 @@ const wrapClass = computed(() => {
     'bg-[#f4f6f8]',
     'dark:bg-[#1e1e20]',
     { 'text-red-500': props.error },
+    { 'loading': props.loading },
   ]
 })
 
 const text = computed(() => {
   const value = props.text ?? ''
   if (!props.asRawText && !props.edit)
-    return mdi.render(value)
+    // the span is a dummy element just for rendering the blinking cursor even
+    // when the value is empty
+    return mdi.render(value) || '<span></span>'
   return value
 })
 
@@ -89,7 +92,8 @@ function handleKeypress(event: KeyboardEvent) {
       event.preventDefault()
       handleSubmit()
     }
-  } else {
+  }
+  else {
     if (event.key === 'Enter' && event.ctrlKey) {
       event.preventDefault()
       handleSubmit()

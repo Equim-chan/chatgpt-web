@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { computed, ref, nextTick, onBeforeUnmount } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref } from 'vue'
 import { NDropdown } from 'naive-ui'
 import AvatarComponent from './Avatar.vue'
 import TextComponent from './Text.vue'
@@ -25,13 +25,13 @@ interface Emit {
   (ev: 'delete'): void
 }
 
-const userStore = useUserStore()
-
-const userInfo = computed(() => userStore.userInfo)
-
 const props = defineProps<Props>()
 
 const emit = defineEmits<Emit>()
+
+const userStore = useUserStore()
+
+const userInfo = computed(() => userStore.userInfo)
 
 const { isMobile } = useBasicLayout()
 
@@ -113,9 +113,8 @@ function handleEditCancel() {
 }
 
 onBeforeUnmount(() => {
-  if (origTextRef.value != null) {
+  if (origTextRef.value != null)
     childValue.value = origTextRef.value
-  }
 })
 
 // for ArrowUp trigger

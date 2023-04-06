@@ -1,5 +1,5 @@
 # build front-end
-FROM node:lts AS frontend
+FROM node:lts-slim AS frontend
 
 RUN npm install pnpm -g
 
@@ -16,7 +16,7 @@ COPY . /app
 RUN pnpm run build
 
 # build backend
-FROM node:lts as backend
+FROM node:lts-slim as backend
 
 RUN npm install pnpm -g
 
@@ -33,7 +33,7 @@ COPY /service /app
 RUN pnpm build
 
 # service
-FROM node:lts
+FROM node:lts-slim
 
 RUN npm install pnpm -g
 

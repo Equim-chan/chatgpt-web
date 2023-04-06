@@ -10,7 +10,7 @@ const app = express()
 const router = express.Router()
 
 app.use(express.static('public'))
-app.use(express.json({limit: '50mb'}))
+app.use(express.json({ limit: '50mb' }))
 
 app.all('*', (_, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
@@ -29,8 +29,19 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
       message: prompt,
       lastContext: options,
       process: (chat: ChatMessage) => {
-        res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`)
-        firstChunk = false
+        if (firstChunk) {
+          firstChunk = false
+          res.write(`0:${JSON.stringify(chat)}\n`)
+        }
+        else {
+          // const slim = {
+          //   id: chat.id,
+          //   delta: chat.detail?.choices?.[0]?.delta?.content ?? '',
+          //   finish_reason: chat.detail?.choices?.[0]?.finish_reason ?? undefined,
+          // }
+          const delta = chat.detail?.choices?.[0]?.delta?.content ?? ''
+          res.write(`D:${JSON.stringify(delta)}\n`)
+        }
       },
       systemMessage,
       temperature,

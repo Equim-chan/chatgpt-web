@@ -3,9 +3,9 @@ import { getLocalState, setLocalState } from './helper'
 import { router } from '@/router'
 
 function truncate(text: string, length: number): string {
-  if (text.length > length + 3) {
-    return text.substring(0, length) + '...'
-  }
+  if (text.length > length + 3)
+    return `${text.substring(0, length)}...`
+
   return text
 }
 

@@ -19,7 +19,7 @@ import { t } from '@/locales'
 
 let controller = new AbortController()
 
-const openLongReply = import.meta.env.VITE_GLOB_OPEN_LONG_REPLY === 'true'
+// const openLongReply = import.meta.env.VITE_GLOB_OPEN_LONG_REPLY === 'true'
 
 const route = useRoute()
 const dialog = useDialog()
@@ -61,7 +61,7 @@ function handleSubmit() {
 }
 
 async function onConversation() {
-  let message = prompt.value
+  const message = prompt.value
 
   if (loading.value)
     return
@@ -88,7 +88,7 @@ async function onEdit(text: string, index: number) {
   if (loading.value)
     return
 
-  let message = text
+  const message = text
   if (!message || message.trim().length === 0)
     return
 
@@ -131,8 +131,9 @@ async function makeConversation(message: string) {
   scrollToBottom()
 
   try {
-    let lastText = ''
+    let text = ''
     const fetchChatAPIOnce = async () => {
+      let idx = 0
       await fetchChatAPIProcess<Chat.ConversationResponse>({
         prompt: message,
         options,
@@ -140,37 +141,57 @@ async function makeConversation(message: string) {
         onDownloadProgress: ({ event }) => {
           const xhr = event.target
           const { responseText } = xhr
-          // Always process the final line
-          const lastIndex = responseText.lastIndexOf('\n', responseText.length - 2)
-          let chunk = responseText
-          if (lastIndex !== -1)
-            chunk = responseText.substring(lastIndex)
-          try {
-            const data = JSON.parse(chunk)
-            updateChat(
-              +uuid,
-              dataSources.value.length - 1,
-              {
-                dateTime: new Date().toLocaleString('zh-CN'),
-                text: lastText + (data.text ?? ''),
-                inversion: false,
-                error: false,
-                loading: true,
-                conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
-              },
-            )
+          const lines = responseText.trim().split('\n')
+          for (; idx < lines.length; idx += 1) {
+            const line = lines[idx]
+            if (line.length === 0)
+              continue
 
-            if (openLongReply && data.detail.choices[0].finish_reason === 'length') {
-              options.parentMessageId = data.id
-              lastText = data.text
-              message = ''
-              return fetchChatAPIOnce()
+            try {
+              const colIdx = line.indexOf(':')
+              const type = line.substring(0, colIdx)
+              const data = JSON.parse(line.substring(colIdx + 1))
+              switch (type) {
+                case '0':
+                  text += data.text
+                  updateChat(
+                    +uuid,
+                    dataSources.value.length - 1,
+                    {
+                      dateTime: new Date().toLocaleString('zh-CN'),
+                      text,
+                      inversion: false,
+                      error: false,
+                      loading: true,
+                      conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
+                    },
+                  )
+                  break
+                case 'D':
+                  text += data
+                  updateChatSome(+uuid, dataSources.value.length - 1, {
+                    dateTime: new Date().toLocaleString('zh-CN'),
+                    text,
+                  })
+                  break
+                // case 'E':
+                //   text += data.delta
+                //   updateChatSome(+uuid, dataSources.value.length - 1, {
+                //     dateTime: new Date().toLocaleString('zh-CN'),
+                //     text,
+                //   })
+                //   // BUG: 这个做法有缺陷，外面不会等待这个 fetchChatAPIOnce()，会导致 abort controller 消失
+                //   if (openLongReply && data.finish_reason === 'length') {
+                //     options.parentMessageId = data.id
+                //     message = ''
+                //     return fetchChatAPIOnce()
+                //   }
+                // break
+              }
+
+              scrollToBottomIfAtBottom()
             }
-
-            scrollToBottomIfAtBottom()
-          }
-          catch (error) {
-            //
+            catch (err) {}
           }
         },
       })
@@ -317,7 +338,8 @@ function handleKeypress(event: KeyboardEvent) {
       event.preventDefault()
       handleSubmit()
     }
-  } else {
+  }
+  else {
     if (event.key === 'Enter' && event.ctrlKey) {
       event.preventDefault()
       handleSubmit()

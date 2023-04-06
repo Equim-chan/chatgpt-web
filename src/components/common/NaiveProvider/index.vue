@@ -30,27 +30,25 @@ async function backgroundSync() {
     if (remoteState.data) {
       delete remoteState.data.active
       if (!dequal(remoteState, oldState)) {
-        const overrideLocal = await new Promise(resolve => {
-          window.$dialog?.warning({
-            title: t('sync.inconsistentData'),
-            content: t('sync.inconsistentDataPrompt'),
-            positiveText: t('common.yes'),
-            negativeText: t('common.no'),
-            onPositiveClick: () => resolve(true),
-            onNegativeClick: () => resolve(false),
-            onEsc: () => resolve(false),
-          })
+        window.$dialog?.warning({
+          title: t('sync.inconsistentData'),
+          content: t('sync.inconsistentDataPrompt'),
+          positiveText: t('common.yes'),
+          negativeText: t('common.no'),
+          onPositiveClick: () => {
+            remoteState.data.active = remoteState.data.history?.[0]?.uuid
+            localStorage.setItem('chatStorage', JSON.stringify(remoteState))
+            window.location.reload()
+          },
+          onNegativeClick: () => {
+            window.$message?.warning(t('sync.autoUpload.disabled'))
+          },
         })
-        if (!overrideLocal) {
-          window.$message?.warning(t('sync.autoUpload.disabled'))
-          return
-        }
-        remoteState.data.active = remoteState.data.history?.[0]?.uuid
-        localStorage.setItem('chatStorage', JSON.stringify(remoteState))
-        window.location.reload()
+        return
       }
     }
-  } catch (err) {
+  }
+  catch (err) {
     window.$message?.error(t('sync.download.failed'))
     console.error(err)
     return
@@ -71,7 +69,8 @@ async function backgroundSync() {
       }
       oldState = recentState
       recentState = newState
-    } catch (err) {
+    }
+    catch (err) {
       window.$message?.error(t('sync.autoUpload.failed'))
       console.error(err)
     }

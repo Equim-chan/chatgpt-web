@@ -12,7 +12,7 @@ export function defaultSetting(): SettingsState {
   const currentDate = new Date().toISOString().split('T')[0]
   return {
     systemMessage: `You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible.\nKnowledge cutoff: 2021-09-01\nCurrent date: ${currentDate}`,
-    temperature: 1.0,
+    temperature: 0.7,
     topP: 0.95,
   }
 }

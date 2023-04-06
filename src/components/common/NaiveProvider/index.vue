@@ -57,7 +57,7 @@ async function backgroundSync() {
   }
 
   const interval = 3000
-  window.$message?.warning(t('sync.autoUpload.enabled'))
+  window.$message?.info(t('sync.autoUpload.enabled'))
 
   let recentState = oldState
   while (true) {

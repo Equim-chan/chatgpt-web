@@ -1,77 +1,87 @@
 .chat-edit-buttons {
-	margin: 10px auto;
-	display: flex;
-  justify-content: space-between;
-	padding: 0 10px;
-	gap: 5px; /* 设置子元素之间的最小间距为5像素 */
+    margin: 10px auto;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    gap: 5px;
+    /* 设置子元素之间的最小间距为5像素 */
 }
 
 .markdown-body {
-	background-color: transparent;
-	font-size: 14px;
+    background-color: transparent;
+    font-size: 14px;
 
-	p {
-		white-space: pre-wrap;
-	}
+    p {
+        white-space: pre-wrap;
+    }
 
-	ol {
-		list-style-type: decimal;
-	}
+    ol {
+        list-style-type: decimal;
+    }
 
-	ul {
-		list-style-type: disc;
-	}
+    ul {
+        list-style-type: disc;
+    }
 
-	pre code,
-	pre tt {
-		line-height: 1.65;
-	}
+    pre code,
+    pre tt {
+        line-height: 1.65;
+    }
 
-	.highlight pre,
-	pre {
-		background-color: #fff;
-	}
+    .highlight pre,
+    pre {
+        background-color: #fff;
+    }
 
-	code.hljs {
-		padding: 0;
-	}
+    code.hljs {
+        padding: 0;
+    }
 
-	.code-block {
-		&-wrapper {
-			position: relative;
-			padding-top: 24px;
-		}
+    .code-block {
+        &-wrapper {
+            position: relative;
+            padding-top: 24px;
+        }
 
-		&-header {
-			position: absolute;
-			top: 5px;
-			right: 0;
-			width: 100%;
-			padding: 0 1rem;
-			display: flex;
-			justify-content: flex-end;
-			align-items: center;
-			color: #b3b3b3;
+        &-header {
+            position: absolute;
+            top: 5px;
+            right: 0;
+            width: 100%;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            color: #b3b3b3;
 
-			&__copy{
-				cursor: pointer;
-				margin-left: 0.5rem;
-				user-select: none;
-				&:hover {
-					color: #65a665;
-				}
-			}
-		}
-	}
+            &__copy {
+                cursor: pointer;
+                margin-left: 0.5rem;
+                user-select: none;
+
+                &:hover {
+                    color: #65a665;
+                }
+            }
+        }
+    }
 }
 
 @keyframes cursor-blink {
-    0% { opacity: 1; }
-    50% { opacity: 0; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
-.loading .markdown-body > :last-child::after {
+.loading .markdown-body> :last-child::after {
     content: "";
     width: 5px;
     height: 20px;
@@ -83,19 +93,19 @@
 }
 
 html.dark {
-	.message-reply {
-		.whitespace-pre-wrap {
-			white-space: pre-wrap;
-			color: var(--n-text-color);
-		}
-	}
+    .message-reply {
+        .whitespace-pre-wrap {
+            white-space: pre-wrap;
+            color: var(--n-text-color);
+        }
+    }
 
-	.highlight pre,
-	pre {
-		background-color: #22272e;
-	}
+    .highlight pre,
+    pre {
+        background-color: #22272e;
+    }
 
-    .loading .markdown-body > :last-child::after {
+    .loading .markdown-body> :last-child::after {
         background: rgb(201, 209, 217);
     }
 }

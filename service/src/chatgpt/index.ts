@@ -89,9 +89,9 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 })()
 
 async function chatReplyProcess(options: RequestOptions) {
-  const { message, lastContext, process, systemMessage, temperature, topP } = options
+  const { message, lastContext, process, abortSignal, systemMessage, temperature, topP } = options
   try {
-    let options: SendMessageOptions = { timeoutMs, completionParams: {} }
+    let options: SendMessageOptions = { timeoutMs, abortSignal, completionParams: {} }
 
     if (apiModel === 'ChatGPTAPI') {
       if (isNotEmptyString(systemMessage))
@@ -119,6 +119,9 @@ async function chatReplyProcess(options: RequestOptions) {
     return sendResponse({ type: 'Success', data: response })
   }
   catch (error: any) {
+    if (error.name === 'AbortError')
+      return
+
     const code = error.statusCode
     global.console.log(error)
     if (Reflect.has(ErrorCodeMessage, code))

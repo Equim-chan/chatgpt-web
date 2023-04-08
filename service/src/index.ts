@@ -23,6 +23,9 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   res.setHeader('Content-type', 'text/event-stream; charset=utf-8')
 
   try {
+    const controller = new AbortController()
+    res.once('close', () => controller.abort())
+
     const { prompt, options = {}, systemMessage, temperature, topP } = req.body as RequestProps
     let firstChunk = true
     await chatReplyProcess({
@@ -34,15 +37,19 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
           res.write(`0:${JSON.stringify(chat)}\n`)
         }
         else {
-          // const slim = {
-          //   id: chat.id,
-          //   delta: chat.detail?.choices?.[0]?.delta?.content ?? '',
-          //   finish_reason: chat.detail?.choices?.[0]?.finish_reason ?? undefined,
-          // }
           const delta = chat.detail?.choices?.[0]?.delta?.content ?? ''
-          res.write(`D:${JSON.stringify(delta)}\n`)
+          const finish_reason = chat.detail?.choices?.[0]?.finish_reason ?? undefined
+          if (finish_reason == null) {
+            res.write(`D:${JSON.stringify(delta)}\n`)
+          }
+          else {
+            const data = { delta, finish_reason }
+            res.write(`F:${JSON.stringify(data)}\n`)
+            res.write('N:\n') // noop
+          }
         }
       },
+      abortSignal: controller.signal,
       systemMessage,
       temperature,
       topP,

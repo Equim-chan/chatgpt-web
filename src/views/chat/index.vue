@@ -19,7 +19,7 @@ import { t } from '@/locales'
 
 let controller = new AbortController()
 
-// const openLongReply = import.meta.env.VITE_GLOB_OPEN_LONG_REPLY === 'true'
+const openLongReply = import.meta.env.VITE_GLOB_OPEN_LONG_REPLY === 'true'
 
 const route = useRoute()
 const dialog = useDialog()
@@ -132,73 +132,77 @@ async function makeConversation(message: string) {
 
   try {
     let text = ''
-    const fetchChatAPIOnce = async () => {
-      let idx = 0
-      await fetchChatAPIProcess<Chat.ConversationResponse>({
-        prompt: message,
-        options,
-        signal: controller.signal,
-        onDownloadProgress: ({ event }) => {
-          const xhr = event.target
-          const { responseText } = xhr
-          const lines = responseText.trim().split('\n')
-          for (; idx < lines.length; idx += 1) {
-            const line = lines[idx]
-            if (line.length === 0)
-              continue
-
-            try {
-              const colIdx = line.indexOf(':')
-              const type = line.substring(0, colIdx)
-              const data = JSON.parse(line.substring(colIdx + 1))
-              switch (type) {
-                case '0':
-                  text += data.text
-                  updateChat(
-                    +uuid,
-                    dataSources.value.length - 1,
-                    {
+    function fetchChatAPIOnce(): Promise<boolean> {
+      return new Promise<boolean>((resolve) => {
+        let offset = 0
+        fetchChatAPIProcess<Chat.ConversationResponse>({
+          prompt: message,
+          options,
+          signal: controller.signal,
+          onDownloadProgress: ({ event }) => {
+            const xhr = event.target
+            const { responseText } = xhr
+            const lines = responseText.substring(offset).trim().split('\n')
+            offset = responseText.length
+            for (const line of lines) {
+              if (line.length === 0)
+                continue
+              try {
+                const colIdx = line.indexOf(':')
+                const type = line.substring(0, colIdx)
+                const data = JSON.parse(line.substring(colIdx + 1))
+                switch (type) {
+                  case '0':
+                    text += data.text
+                    updateChat(
+                      +uuid,
+                      dataSources.value.length - 1,
+                      {
+                        dateTime: new Date().toLocaleString('zh-CN'),
+                        text,
+                        inversion: false,
+                        error: false,
+                        loading: true,
+                        conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
+                      },
+                    )
+                    break
+                  case 'D':
+                    text += data
+                    updateChatSome(+uuid, dataSources.value.length - 1, {
                       dateTime: new Date().toLocaleString('zh-CN'),
                       text,
-                      inversion: false,
-                      error: false,
-                      loading: true,
-                      conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
-                    },
-                  )
-                  break
-                case 'D':
-                  text += data
-                  updateChatSome(+uuid, dataSources.value.length - 1, {
-                    dateTime: new Date().toLocaleString('zh-CN'),
-                    text,
-                  })
-                  break
-                // case 'E':
-                //   text += data.delta
-                //   updateChatSome(+uuid, dataSources.value.length - 1, {
-                //     dateTime: new Date().toLocaleString('zh-CN'),
-                //     text,
-                //   })
-                //   // BUG: 这个做法有缺陷，外面不会等待这个 fetchChatAPIOnce()，会导致 abort controller 消失
-                //   if (openLongReply && data.finish_reason === 'length') {
-                //     options.parentMessageId = data.id
-                //     message = ''
-                //     return fetchChatAPIOnce()
-                //   }
-                // break
-              }
+                    })
+                    break
+                  case 'F':
+                    text += data.delta
+                    updateChatSome(+uuid, dataSources.value.length - 1, {
+                      dateTime: new Date().toLocaleString('zh-CN'),
+                      text,
+                    })
+                    return resolve(openLongReply && data.finish_reason === 'length')
+                }
 
-              scrollToBottomIfAtBottom()
+                scrollToBottomIfAtBottom()
+              }
+              catch (err) {}
             }
-            catch (err) {}
-          }
-        },
+          },
+        })
+          .finally(() => resolve(false))
       })
-      updateChatSome(+uuid, dataSources.value.length - 1, { loading: false })
     }
 
-    await fetchChatAPIOnce()
+    while (true) {
+      const shouldContinue = await fetchChatAPIOnce()
+      if (!shouldContinue)
+        break
+
+      options.parentMessageId = getChatByUuidAndIndex(+uuid, dataSources.value.length - 1)?.conversationOptions?.parentMessageId
+      message = ''
+    }
+
+    updateChatSome(+uuid, dataSources.value.length - 1, { loading: false })
   }
   catch (error: any) {
     const errorMessage = error?.message ?? t('common.wrong')
